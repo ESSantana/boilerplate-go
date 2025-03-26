@@ -1,0 +1,50 @@
+services:
+  db:
+    image: mysql
+    container_name: boilerplate-go-db
+    restart: always
+    env_file:
+      - ./db.env
+    ports:
+      - 3306:3306
+    volumes:
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./sql/tmp/mysql:/var/lib/mysql
+    networks:
+      - db-network
+
+  cache:
+    image: redis
+    container_name: boilerplate-go-cache
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - ./.redis/run:/var/run
+    ports:
+      - 6379:6379
+    restart: always
+    networks:
+      - cache-network
+
+  api:
+    build: ./
+    container_name: boilerplate-go
+    restart: always
+    env_file:
+      - ./api.env
+    ports:
+      - 8080:8080
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - cache
+    networks:
+      - db-network
+      - cache-network
+
+networks:
+  cache-network:
+    driver: bridge
+  db-network:
+    driver: bridge
