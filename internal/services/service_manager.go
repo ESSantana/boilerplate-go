@@ -1,9 +1,9 @@
 package services
 
 import (
-	repo_interfaces "github.com/ESSantana/boilerplate-go/internal/repositories/interfaces"
-	"github.com/ESSantana/boilerplate-go/internal/services/interfaces"
-	"github.com/ESSantana/boilerplate-go/packages/log"
+	repo_interfaces "github.com/application-ellas/ellas-backend/internal/repositories/interfaces"
+	"github.com/application-ellas/ellas-backend/internal/services/interfaces"
+	"github.com/application-ellas/ellas-backend/packages/log"
 )
 
 type serviceManager struct {
@@ -20,4 +20,8 @@ func NewServiceManager(logger log.Logger, repoManager repo_interfaces.Repository
 
 func (sm *serviceManager) NewUserService() interfaces.UserService {
 	return newUserService(sm.logger, sm.repoManager)
+}
+
+func (sm *serviceManager) NewServiceProviderService() interfaces.ServiceProviderService {
+	return newServiceProviderService(sm.logger, sm.repoManager)
 }

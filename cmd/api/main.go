@@ -7,18 +7,18 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/ESSantana/boilerplate-go/internal/repositories"
-	repo_interfaces "github.com/ESSantana/boilerplate-go/internal/repositories/interfaces"
-	"github.com/ESSantana/boilerplate-go/internal/routes"
-	"github.com/ESSantana/boilerplate-go/internal/services"
-	svc_interfaces "github.com/ESSantana/boilerplate-go/internal/services/interfaces"
-	"github.com/ESSantana/boilerplate-go/packages/cache"
-	cache_interfaces "github.com/ESSantana/boilerplate-go/packages/cache/interfaces"
+	"github.com/application-ellas/ellas-backend/internal/repositories"
+	repo_interfaces "github.com/application-ellas/ellas-backend/internal/repositories/interfaces"
+	"github.com/application-ellas/ellas-backend/internal/routes"
+	"github.com/application-ellas/ellas-backend/internal/services"
+	svc_interfaces "github.com/application-ellas/ellas-backend/internal/services/interfaces"
+	"github.com/application-ellas/ellas-backend/packages/cache"
+	cache_interfaces "github.com/application-ellas/ellas-backend/packages/cache/interfaces"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 
-	"github.com/ESSantana/boilerplate-go/packages/log"
+	"github.com/application-ellas/ellas-backend/packages/log"
 )
 
 var logger log.Logger

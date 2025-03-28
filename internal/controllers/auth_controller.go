@@ -7,14 +7,14 @@ import (
 
 	"net/http"
 
-	"github.com/ESSantana/boilerplate-go/internal/domain/constants"
-	svc_interfaces "github.com/ESSantana/boilerplate-go/internal/services/interfaces"
-	"github.com/ESSantana/boilerplate-go/internal/utils"
-	cache_interfaces "github.com/ESSantana/boilerplate-go/packages/cache/interfaces"
-	"github.com/ESSantana/boilerplate-go/packages/jwt"
-	"github.com/ESSantana/boilerplate-go/packages/log"
-	"github.com/ESSantana/boilerplate-go/packages/sso"
-	sso_interfaces "github.com/ESSantana/boilerplate-go/packages/sso/interfaces"
+	"github.com/application-ellas/ellas-backend/internal/domain/constants"
+	svc_interfaces "github.com/application-ellas/ellas-backend/internal/services/interfaces"
+	"github.com/application-ellas/ellas-backend/internal/utils"
+	cache_interfaces "github.com/application-ellas/ellas-backend/packages/cache/interfaces"
+	"github.com/application-ellas/ellas-backend/packages/jwt"
+	"github.com/application-ellas/ellas-backend/packages/log"
+	"github.com/application-ellas/ellas-backend/packages/sso"
+	sso_interfaces "github.com/application-ellas/ellas-backend/packages/sso/interfaces"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -112,7 +112,7 @@ func (ctlr *AuthController) SSOCallback(response http.ResponseWriter, request *h
 		return
 	}
 
-	token, err := jwt.GenerateAuthToken(user.ID, user.Name, "user")
+	token, err := jwt.GenerateAuthToken(user)
 	if err != nil {
 		ctlr.logger.Errorf("auth token error: %s", err.Error())
 		body := map[string]interface{}{

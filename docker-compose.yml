@@ -1,7 +1,7 @@
 services:
   db:
     image: mysql
-    container_name: boilerplate-go-db
+    container_name: ellas-mysql
     restart: always
     env_file:
       - ./db.env
@@ -15,7 +15,7 @@ services:
 
   cache:
     image: redis
-    container_name: boilerplate-go-cache
+    container_name: ellas-redis
     command: redis-server /usr/local/etc/redis/redis.conf
     volumes:
       - ./redis.conf:/usr/local/etc/redis/redis.conf
@@ -28,7 +28,7 @@ services:
 
   api:
     build: ./
-    container_name: boilerplate-go
+    container_name: ellas-api
     restart: always
     env_file:
       - ./api.env

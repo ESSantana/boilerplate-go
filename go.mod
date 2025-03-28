@@ -1,4 +1,4 @@
-module github.com/ESSantana/boilerplate-go
+module github.com/application-ellas/ellas-backend
 
 go 1.24
 

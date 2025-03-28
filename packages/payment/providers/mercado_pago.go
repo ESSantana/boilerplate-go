@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/ESSantana/boilerplate-go/internal/domain/dto"
-	"github.com/ESSantana/boilerplate-go/packages/log"
-	"github.com/ESSantana/boilerplate-go/packages/payment/interfaces"
+	"github.com/application-ellas/ellas-backend/internal/domain/dto"
+	"github.com/application-ellas/ellas-backend/packages/log"
+	"github.com/application-ellas/ellas-backend/packages/payment/interfaces"
 	"github.com/mercadopago/sdk-go/pkg/config"
 	"github.com/mercadopago/sdk-go/pkg/preference"
 )

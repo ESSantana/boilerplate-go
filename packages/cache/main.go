@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/ESSantana/boilerplate-go/packages/cache/interfaces"
+	"github.com/application-ellas/ellas-backend/packages/cache/interfaces"
 	"github.com/redis/go-redis/v9"
 )
 

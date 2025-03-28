@@ -1,9 +1,9 @@
 package payment
 
 import (
-	"github.com/ESSantana/boilerplate-go/packages/log"
-	"github.com/ESSantana/boilerplate-go/packages/payment/interfaces"
-	"github.com/ESSantana/boilerplate-go/packages/payment/providers"
+	"github.com/application-ellas/ellas-backend/packages/log"
+	"github.com/application-ellas/ellas-backend/packages/payment/interfaces"
+	"github.com/application-ellas/ellas-backend/packages/payment/providers"
 )
 
 type PaymentManager struct {

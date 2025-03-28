@@ -6,13 +6,13 @@ import (
 
 	"net/http"
 
-	"github.com/ESSantana/boilerplate-go/internal/domain/constants"
-	"github.com/ESSantana/boilerplate-go/internal/domain/dto"
-	svc_interfaces "github.com/ESSantana/boilerplate-go/internal/services/interfaces"
-	"github.com/ESSantana/boilerplate-go/internal/utils"
-	"github.com/ESSantana/boilerplate-go/packages/log"
-	"github.com/ESSantana/boilerplate-go/packages/payment"
-	payment_interfaces "github.com/ESSantana/boilerplate-go/packages/payment/interfaces"
+	"github.com/application-ellas/ellas-backend/internal/domain/constants"
+	"github.com/application-ellas/ellas-backend/internal/domain/dto"
+	svc_interfaces "github.com/application-ellas/ellas-backend/internal/services/interfaces"
+	"github.com/application-ellas/ellas-backend/internal/utils"
+	"github.com/application-ellas/ellas-backend/packages/log"
+	"github.com/application-ellas/ellas-backend/packages/payment"
+	payment_interfaces "github.com/application-ellas/ellas-backend/packages/payment/interfaces"
 )
 
 type PaymentController struct {

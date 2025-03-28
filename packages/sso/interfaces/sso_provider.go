@@ -3,7 +3,7 @@ package interfaces
 import (
 	"net/http"
 
-	"github.com/ESSantana/boilerplate-go/internal/domain/dto"
+	"github.com/application-ellas/ellas-backend/internal/domain/dto"
 )
 
 type SSOProvider interface {

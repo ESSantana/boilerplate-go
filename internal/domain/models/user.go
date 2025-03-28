@@ -14,4 +14,15 @@ type User struct {
 	CreatedAt       time.Time  `db:"created_at" json:"created_at"`
 	UpdatedAt       time.Time  `db:"updated_at" json:"updated_at"`
 	DeletedAt       *time.Time `db:"deleted_at" json:"deleted_at"`
+
+	UserRoles       []UserRole `json:"user_roles"`
+}
+
+
+func (user *User) GetUserRoles() []string {
+	roles := make([]string, 0)
+	for _, userRole := range user.UserRoles {
+		roles = append(roles, userRole.Role)
+	}
+	return roles
 }

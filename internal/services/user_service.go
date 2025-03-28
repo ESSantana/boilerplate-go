@@ -3,14 +3,13 @@ package services
 import (
 	"context"
 	"strings"
-	"time"
 
-	"github.com/ESSantana/boilerplate-go/internal/domain/errors"
-	"github.com/ESSantana/boilerplate-go/internal/domain/models"
-	repo_interfaces "github.com/ESSantana/boilerplate-go/internal/repositories/interfaces"
-	"github.com/ESSantana/boilerplate-go/internal/services/interfaces"
-	"github.com/ESSantana/boilerplate-go/internal/utils"
-	"github.com/ESSantana/boilerplate-go/packages/log"
+	"github.com/application-ellas/ellas-backend/internal/domain/errors"
+	"github.com/application-ellas/ellas-backend/internal/domain/models"
+	repo_interfaces "github.com/application-ellas/ellas-backend/internal/repositories/interfaces"
+	"github.com/application-ellas/ellas-backend/internal/services/interfaces"
+	"github.com/application-ellas/ellas-backend/internal/utils"
+	"github.com/application-ellas/ellas-backend/packages/log"
 )
 
 type userService struct {
@@ -60,13 +59,6 @@ func (svc *userService) CreateUserIfNotExists(ctx context.Context, name, email, 
 		return user, nil
 	}
 
-	loc, err := time.LoadLocation("America/Sao_Paulo")
-	if err != nil {
-		svc.logger.Errorf("error at loading location: %s", err.Error())
-		return user, errors.NewOperationError("error creating user registration")
-	}
-	now := time.Now().In(loc)
-
 	user = models.User{
 		ID:              id,
 		Name:            name,
@@ -74,14 +66,18 @@ func (svc *userService) CreateUserIfNotExists(ctx context.Context, name, email, 
 		ProviderOrigin:  provider,
 		ExternalID:      externalID,
 		ProfileImageURL: profileImageURL,
-		CreatedAt:       now,
-		UpdatedAt:       now,
 	}
 
 	err = userRepo.CreateUser(ctx, user)
 	if err != nil {
-		svc.logger.Errorf("error at create user: %s", err.Error())
+		svc.logger.Errorf("error at userRepo.CreateUser: %s", err.Error())
 		return user, errors.NewOperationError("error creating user registration")
+	}
+
+	user, err = userRepo.GetUserById(ctx, id)
+	if err != nil {
+		svc.logger.Errorf("error at userRepo.GetUserById: %s", err.Error())
+		return user, errors.NewOperationError("error getting user registration")
 	}
 
 	return user, nil
