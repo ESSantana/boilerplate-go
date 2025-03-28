@@ -17,7 +17,7 @@ spec:
     - ReadWriteOnce
   volumeMode: Filesystem
   hostPath:
-    path: D:\Code\real-projects\ellas-backend\local-storage\mysql
+    path: .\local-storage\mysql
   persistentVolumeReclaimPolicy: Retain
 ---
 apiVersion: v1
