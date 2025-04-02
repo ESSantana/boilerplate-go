@@ -44,46 +44,30 @@ func (ctlr *PaymentController) ExecutePayment(response http.ResponseWriter, requ
 
 	provider, err := ctlr.paymentManager.NewMercadoPagoProvider()
 	if err != nil {
-		body := map[string]interface{}{
-			"error":   true,
-			"message": err.Error(),
-		}
-		utils.CreateResponse(&response, http.StatusInternalServerError, body)
+		utils.CreateResponse(&response, http.StatusInternalServerError, err)
 		return
 	}
 
 	providerResponse, err := provider.ExecutePayment(ctxWithTimeout, requestBody)
 	if err != nil {
-		body := map[string]interface{}{
-			"error":   true,
-			"message": err.Error(),
-		}
-		utils.CreateResponse(&response, http.StatusInternalServerError, body)
+		utils.CreateResponse(&response, http.StatusInternalServerError, &json.UnmarshalTypeError{})
 		return
 	}
 
 	bytes, err := json.Marshal(*providerResponse)
 	if err != nil {
-		body := map[string]interface{}{
-			"error":   true,
-			"message": err.Error(),
-		}
-		utils.CreateResponse(&response, http.StatusInternalServerError, body)
+		utils.CreateResponse(&response, http.StatusInternalServerError, err)
 		return
 	}
 
 	var responseBody map[string]interface{}
 	err = json.Unmarshal(bytes, &responseBody)
 	if err != nil {
-		body := map[string]interface{}{
-			"error":   true,
-			"message": err.Error(),
-		}
-		utils.CreateResponse(&response, http.StatusInternalServerError, body)
+		utils.CreateResponse(&response, http.StatusInternalServerError, err)
 		return
 	}
 
-	utils.CreateResponse(&response, http.StatusOK, responseBody)
+	utils.CreateResponse(&response, http.StatusOK, nil, responseBody)
 }
 
 func (ctlr *PaymentController) PaymentWebhook(response http.ResponseWriter, request *http.Request) {

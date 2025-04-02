@@ -33,22 +33,16 @@ func (ctlr *ServiceProviderController) PromoteUserToServiceProvider(response htt
 	context, cancel := context.WithTimeout(request.Context(), constants.DefaultTimeout)
 	defer cancel()
 
-	body, err := io.ReadAll(request.Body)
+		body, err := io.ReadAll(request.Body)
 	if err != nil {
-		utils.CreateResponse(&response, http.StatusBadRequest, map[string]interface{}{
-			"error":   true,
-			"message": "Invalid request body",
-		})
+		utils.CreateResponse(&response, http.StatusBadRequest, err)
 		return
 	}
 
 	var creationRequest dto.ServiceProviderCreationRequest
 	err = json.Unmarshal(body, &creationRequest)
 	if err != nil {
-		utils.CreateResponse(&response, http.StatusBadRequest, map[string]interface{}{
-			"error":   true,
-			"message": "Invalid request body",
-		})
+		utils.CreateResponse(&response, http.StatusBadRequest, err)
 		return
 	}
 
@@ -57,17 +51,8 @@ func (ctlr *ServiceProviderController) PromoteUserToServiceProvider(response htt
 	serviceProviderService := ctlr.serviceManager.NewServiceProviderService()
 	err = serviceProviderService.PromoteUserToServiceProvider(context, creationRequest.UserID)
 	if err != nil {
-		utils.CreateResponse(&response, http.StatusInternalServerError, map[string]interface{}{
-			"error":   true,
-			"message": err.Error(),
-		})
+		utils.CreateResponse(&response, http.StatusInternalServerError, err)
 		return
 	}
-
-	responseBody := map[string]interface{}{
-		"error":   false,
-		"message": "User promoted to service provider successfully",
-	}
-
-	utils.CreateResponse(&response, http.StatusOK, responseBody)
+	utils.CreateResponse(&response, http.StatusOK, nil, "User promoted to service provider successfully")
 }

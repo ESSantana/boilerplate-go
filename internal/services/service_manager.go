@@ -25,3 +25,7 @@ func (sm *serviceManager) NewUserService() interfaces.UserService {
 func (sm *serviceManager) NewServiceProviderService() interfaces.ServiceProviderService {
 	return newServiceProviderService(sm.logger, sm.repoManager)
 }
+
+func (sm *serviceManager) NewProductService() interfaces.ProductService {
+	return newProductService(sm.logger, sm.repoManager)
+}

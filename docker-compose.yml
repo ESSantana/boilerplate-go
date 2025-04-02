@@ -1,15 +1,32 @@
 services:
+  traefik:
+    image: "traefik:v3.3"
+    container_name: "traefik"
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entryPoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=contato@emershow.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - "letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
   db:
     image: mysql
     container_name: ellas-mysql
     restart: always
-    env_file:
+    environment:
       - ./db.env
     ports:
       - 3306:3306
     volumes:
       - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./sql/tmp/mysql:/var/lib/mysql
+      - mysql:/var/lib/mysql
     networks:
       - db-network
 
@@ -19,7 +36,7 @@ services:
     command: redis-server /usr/local/etc/redis/redis.conf
     volumes:
       - ./redis.conf:/usr/local/etc/redis/redis.conf
-      - ./.redis/run:/var/run
+      - redis:/var/run
     ports:
       - 6379:6379
     restart: always
@@ -28,10 +45,17 @@ services:
 
   api:
     build: ./
-    container_name: ellas-api
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`emershow.com`)"
+      - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.api.tls.certresolver=myresolver"
     restart: always
     env_file:
       - ./api.env
+    deploy:
+      mode: replicated
+      replicas: 2
     ports:
       - 8080:8080
     volumes:
@@ -42,6 +66,25 @@ services:
     networks:
       - db-network
       - cache-network
+volumes:
+  letsencrypt:
+    driver: local
+    driver_opts:
+      type: none
+      device: ../data/letsencrypt
+      o: bind
+  mysql:
+    driver: local
+    driver_opts:
+      type: none
+      device: ../data/mysql
+      o: bind
+  redis:
+    driver: local
+    driver_opts:
+      type: none
+      device: ../data/redis
+      o: bind
 
 networks:
   cache-network:

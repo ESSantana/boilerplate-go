@@ -50,22 +50,14 @@ func (ctlr *AuthController) SSORequest(response http.ResponseWriter, request *ht
 	providerName := chi.URLParam(request, "provider")
 	provider, err := ctlr.ssoManager.GetProvider(providerName)
 	if err != nil {
-		body := map[string]interface{}{
-			"error":   true,
-			"message": err.Error(),
-		}
-		utils.CreateResponse(&response, http.StatusInternalServerError, body)
+		utils.CreateResponse(&response, http.StatusInternalServerError, err)
 		return
 	}
 
 	url, state := provider.GetSigninURL()
 	err = ctlr.cacheManager.SetFlagWithExpiration(request.Context(), state, true, time.Minute*3)
 	if err != nil {
-		body := map[string]interface{}{
-			"error":   true,
-			"message": err.Error(),
-		}
-		utils.CreateResponse(&response, http.StatusInternalServerError, body)
+		utils.CreateResponse(&response, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -73,7 +65,7 @@ func (ctlr *AuthController) SSORequest(response http.ResponseWriter, request *ht
 		"redirect_url": url,
 	}
 
-	utils.CreateResponse(&response, http.StatusOK, responseBody)
+	utils.CreateResponse(&response, http.StatusOK, nil, responseBody)
 }
 
 func (ctlr *AuthController) SSOCallback(response http.ResponseWriter, request *http.Request) {
@@ -83,47 +75,30 @@ func (ctlr *AuthController) SSOCallback(response http.ResponseWriter, request *h
 	providerName := chi.URLParam(request, "provider")
 	provider, err := ctlr.ssoManager.GetProvider(providerName)
 	if err != nil {
-		body := map[string]interface{}{
-			"error":   true,
-			"message": err.Error(),
-		}
-		utils.CreateResponse(&response, http.StatusInternalServerError, body)
+		utils.CreateResponse(&response, http.StatusInternalServerError, err)
 		return
 	}
 
 	data, err := provider.GetUserData(request)
 	if err != nil {
-		body := map[string]interface{}{
-			"error":   true,
-			"message": err.Error(),
-		}
-		utils.CreateResponse(&response, http.StatusInternalServerError, body)
+		utils.CreateResponse(&response, http.StatusInternalServerError, err)
 		return
 	}
 
 	userService := ctlr.serviceManager.NewUserService()
 	user, err := userService.CreateUserIfNotExists(ctx, data.Name, data.Email, providerName, data.ExternalID, data.ProfileImageURL)
 	if err != nil {
-		body := map[string]interface{}{
-			"error":   true,
-			"message": err.Error(),
-		}
-		utils.CreateResponse(&response, http.StatusInternalServerError, body)
+		utils.CreateResponse(&response, http.StatusInternalServerError, err)
 		return
 	}
 
 	token, err := jwt.GenerateAuthToken(user)
 	if err != nil {
 		ctlr.logger.Errorf("auth token error: %s", err.Error())
-		body := map[string]interface{}{
-			"error":   true,
-			"message": "error generating auth token",
-		}
-		utils.CreateResponse(&response, http.StatusInternalServerError, body)
+		utils.CreateResponse(&response, http.StatusInternalServerError, err)
 		return
 	}
 
 	url := os.Getenv("FRONTEND_URL") + "?token=" + token
-
 	http.Redirect(response, request, url, http.StatusSeeOther)
 }

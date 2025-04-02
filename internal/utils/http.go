@@ -5,9 +5,24 @@ import (
 	"errors"
 	"io"
 	"net/http"
+
+	"github.com/application-ellas/ellas-backend/internal/domain/dto"
 )
 
-func CreateResponse(response *http.ResponseWriter, statusCode int, body map[string]interface{}) {
+func CreateResponse(response *http.ResponseWriter, statusCode int, err error, data ...any) {
+	var body dto.HttpResponse
+	if err != nil {
+		body = dto.HttpResponse{
+			Error:   true,
+			Message: err.Error(),
+		}
+	} else {
+		body = dto.HttpResponse{
+			Error: false,
+			Data:  data[0],
+		}
+	}
+
 	bodyResponse, err := json.Marshal(body)
 	if err != nil {
 		panic(errors.New("something went wrong on http utils "))
@@ -21,19 +36,13 @@ func ReadBody[T any](request *http.Request, response http.ResponseWriter) (outpu
 	var bodyRequest T
 	body, err := io.ReadAll(request.Body)
 	if err != nil {
-		responseBody := map[string]interface{}{
-			"message": "payload malformed",
-		}
-		CreateResponse(&response, http.StatusBadRequest, responseBody)
+		CreateResponse(&response, http.StatusBadRequest, err)
 		return bodyRequest
 	}
 
 	err = json.Unmarshal(body, &bodyRequest)
 	if err != nil {
-		responseBody := map[string]interface{}{
-			"message": "payload malformed",
-		}
-		CreateResponse(&response, http.StatusBadRequest, responseBody)
+		CreateResponse(&response, http.StatusBadRequest, err)
 		return bodyRequest
 	}
 	return bodyRequest
