@@ -3,7 +3,7 @@ services:
     image: "traefik:v3.3"
     container_name: "traefik"
     command:
-      - "--providers.docker=true"
+      - "--providers.docker"
       - "--providers.docker.exposedbydefault=false"
       - "--entryPoints.websecure.address=:443"
       - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
@@ -16,8 +16,10 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - "../data/letsencrypt:/letsencrypt"
+      - "/var/letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - public
   db:
     image: mysql
     restart: always
@@ -57,13 +59,13 @@ services:
       timeout: 5s
       retries: 20
 
-  api:
+  ellasapi:
     build: ./
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.api.rule=Host(`emershow.com`)"
-      - "traefik.http.routers.api.entrypoints=websecure"
-      - "traefik.http.routers.api.tls.certresolver=myresolver"
+      - "traefik.http.routers.ellasapi.rule=Host(`emershow.com`)"
+      - "traefik.http.routers.ellasapi.entrypoints=websecure"
+      - "traefik.http.routers.ellasapi.tls.certresolver=myresolver"
     restart: always
     env_file:
       - ./api.env
@@ -73,6 +75,7 @@ services:
     volumes:
       - .:/app
     networks:
+      - public
       - db-network
       - cache-network
     depends_on:
@@ -85,4 +88,6 @@ networks:
   cache-network:
     driver: bridge
   db-network:
+    driver: bridge
+  public:
     driver: bridge
