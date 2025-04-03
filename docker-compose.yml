@@ -63,7 +63,7 @@ services:
     build: ./
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.ellasapi.rule=Host(`emershow.com`)"
+      - "traefik.http.routers.ellasapi.rule=Host(`api.emershow.com`)"
       - "traefik.http.routers.ellasapi.entrypoints=websecure"
       - "traefik.http.routers.ellasapi.tls.certresolver=myresolver"
     restart: always
