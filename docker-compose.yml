@@ -47,7 +47,7 @@ services:
     volumes:
       - ./redis.conf:/usr/local/etc/redis/redis.conf
       # - ../data/redis:/var/run # use this to dev local volume
-      - /var/run:/var/run # use this to prd local volume
+      - /var/redis:/var/run # use this to prd local volume
     ports:
       - 6379:6379
     restart: always
