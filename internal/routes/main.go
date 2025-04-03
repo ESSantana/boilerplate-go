@@ -1,6 +1,10 @@
 package routes
 
 import (
+	"encoding/json"
+	"net/http"
+	"time"
+
 	"github.com/application-ellas/ellas-backend/internal/controllers"
 	"github.com/application-ellas/ellas-backend/internal/domain/models"
 	"github.com/application-ellas/ellas-backend/internal/routes/middlewares"
@@ -11,6 +15,18 @@ import (
 )
 
 func ConfigRoutes(router *chi.Mux, logger log.Logger, serviceManager svc_interfaces.ServiceManager, cacheManager cache_interfaces.CacheManager) {
+	router.Get("/health-check", func(w http.ResponseWriter, r *http.Request) {
+		dbHealthStatus, cacheHealthStatus := serviceManager.HealthCheck()
+		payload := map[string]any{
+			"checked_at": time.Now().Format(time.RFC3339),
+			"mysql":      dbHealthStatus,
+			"redis":      cacheHealthStatus,
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(payload)
+	})
+
 	configAuth(router, logger, serviceManager, cacheManager)
 	configPayment(router, logger, serviceManager)
 	configServiceProvider(router, logger, serviceManager, cacheManager)

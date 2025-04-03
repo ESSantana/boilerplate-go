@@ -3,32 +3,40 @@ services:
     image: "traefik:v3.3"
     container_name: "traefik"
     command:
-      - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entryPoints.websecure.address=:443"
       - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
       - "--certificatesresolvers.myresolver.acme.email=contato@emershow.com"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--entryPoints.web.address=:80"
+      - "--entryPoints.websecure.http.redirections.entryPoint.to=websecure"
+      - "--entryPoints.websecure.http.redirections.entryPoint.scheme=https"
     ports:
+      - "80:80"
       - "443:443"
-      - "8080:8080"
     volumes:
-      - "letsencrypt:/letsencrypt"
+      - "../data/letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
   db:
     image: mysql
-    container_name: ellas-mysql
     restart: always
-    environment:
+    container_name: ellas-mysql
+    env_file:
       - ./db.env
     ports:
       - 3306:3306
     volumes:
       - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - mysql:/var/lib/mysql
+      # - ../data/mysql:/var/lib/mysql # use this to dev local volume
+      - /var/lib/mysql:/var/lib/mysql # use this to prd local volume
     networks:
       - db-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      start_period: 5s
+      timeout: 5s
+      retries: 20
 
   cache:
     image: redis
@@ -36,12 +44,18 @@ services:
     command: redis-server /usr/local/etc/redis/redis.conf
     volumes:
       - ./redis.conf:/usr/local/etc/redis/redis.conf
-      - redis:/var/run
+      # - ../data/redis:/var/run # use this to dev local volume
+      - /var/run:/var/run # use this to prd local volume
     ports:
       - 6379:6379
     restart: always
     networks:
       - cache-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      start_period: 5s
+      timeout: 5s
+      retries: 20
 
   api:
     build: ./
@@ -56,35 +70,16 @@ services:
     deploy:
       mode: replicated
       replicas: 2
-    ports:
-      - 8080:8080
     volumes:
       - .:/app
-    depends_on:
-      - db
-      - cache
     networks:
       - db-network
       - cache-network
-volumes:
-  letsencrypt:
-    driver: local
-    driver_opts:
-      type: none
-      device: ../data/letsencrypt
-      o: bind
-  mysql:
-    driver: local
-    driver_opts:
-      type: none
-      device: ../data/mysql
-      o: bind
-  redis:
-    driver: local
-    driver_opts:
-      type: none
-      device: ../data/redis
-      o: bind
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
 
 networks:
   cache-network:

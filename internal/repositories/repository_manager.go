@@ -40,6 +40,10 @@ func NewRepositoryManager(ctx context.Context) interfaces.RepositoryManager {
 	}
 }
 
+func (rm *repositoryManager) DatabaseHealthCheck() error {
+	return rm.conn.Ping()
+}
+
 func (rm *repositoryManager) NewUserRepository() interfaces.UserRepository {
 	return newUserRepository(rm.conn)
 }

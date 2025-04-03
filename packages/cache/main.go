@@ -26,6 +26,10 @@ func NewCacheManager() interfaces.CacheManager {
 	}
 }
 
+func (cache *cacheManager) CacheHealthCheck() error {
+	return cache.client.Ping(context.Background()).Err()
+}
+
 func (cache *cacheManager) SetFlagWithExpiration(ctx context.Context, key string, value bool, expiration time.Duration) error {
 	err := cache.client.Set(ctx, key, value, expiration).Err()
 	return err

@@ -29,9 +29,9 @@ var router *chi.Mux
 
 func main() {
 	logger = log.NewLogger(log.DEBUG)
+	singletonCache()
 	singletonRepository(context.Background())
 	singletonService(logger)
-	singletonCache()
 	setupRoute()
 
 	defer startServer(router)
@@ -75,7 +75,7 @@ func singletonService(logger log.Logger) {
 	if serviceManager != nil {
 		return
 	}
-	serviceManager = services.NewServiceManager(logger, repoManager)
+	serviceManager = services.NewServiceManager(logger, repoManager, cacheManager)
 }
 
 func singletonCache() {
