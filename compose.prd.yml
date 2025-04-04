@@ -1,7 +1,6 @@
 services:
   traefik:
     image: "traefik:v3.3"
-    container_name: "traefik"
     command:
       - "--providers.docker"
       - "--providers.docker.exposedbydefault=false"
@@ -22,16 +21,13 @@ services:
       - public
   db:
     image: mysql
-    restart: always
-    container_name: ellas-mysql
     env_file:
       - ./db.env
     ports:
       - 3306:3306
     volumes:
       - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
-      # - ../data/mysql:/var/lib/mysql # use this to dev local volume
-      - /var/lib/mysql:/var/lib/mysql # use this to prd local volume
+      - /var/lib/mysql:/var/lib/mysql
     networks:
       - db-network
     healthcheck:
@@ -42,15 +38,12 @@ services:
 
   cache:
     image: redis
-    container_name: ellas-redis
     command: redis-server /usr/local/etc/redis/redis.conf
     volumes:
       - ./redis.conf:/usr/local/etc/redis/redis.conf
-      # - ../data/redis:/var/run # use this to dev local volume
-      - /var/redis:/var/run # use this to prd local volume
+      - /var/redis:/var/run
     ports:
       - 6379:6379
-    restart: always
     networks:
       - cache-network
     healthcheck:
@@ -59,14 +52,13 @@ services:
       timeout: 5s
       retries: 20
 
-  ellasapi:
-    build: ./
+  ellaapi:
+    image: ghcr.io/application-ellas/api:vbeta0.1
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.ellasapi.rule=Host(`api.emershow.com`)"
       - "traefik.http.routers.ellasapi.entrypoints=websecure"
       - "traefik.http.routers.ellasapi.tls.certresolver=myresolver"
-    restart: always
     env_file:
       - ./api.env
     deploy:
@@ -78,16 +70,11 @@ services:
       - public
       - db-network
       - cache-network
-    depends_on:
-      db:
-        condition: service_healthy
-      cache:
-        condition: service_healthy
-
+    
 networks:
   cache-network:
-    driver: bridge
+    driver: overlay
   db-network:
-    driver: bridge
+    driver: overlay
   public:
-    driver: bridge
+    driver: overlay
