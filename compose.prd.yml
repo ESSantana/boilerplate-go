@@ -12,8 +12,14 @@ services:
       - "--entryPoints.websecure.http.redirections.entryPoint.to=websecure"
       - "--entryPoints.websecure.http.redirections.entryPoint.scheme=https"
     ports:
-      - "80:80"
-      - "443:443"
+      - mode: host
+        protocol: tcp
+        published: 80
+        target: 80
+      - mode: host
+        protocol: tcp
+        published: 443
+        target: 443
     volumes:
       - "/var/letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
@@ -56,9 +62,10 @@ services:
     image: ghcr.io/application-ellas/api:vbeta0.1
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.ellasapi.rule=Host(`api.emershow.com`)"
-      - "traefik.http.routers.ellasapi.entrypoints=websecure"
-      - "traefik.http.routers.ellasapi.tls.certresolver=myresolver"
+      - "traefik.http.services.ellaapi.loadbalancer.server.port=8080"
+      - "traefik.http.routers.ellaapi.rule=Host(`api.emershow.com`)"
+      - "traefik.http.routers.ellaapi.entrypoints=websecure"
+      - "traefik.http.routers.ellaapi.tls.certresolver=myresolver"
     env_file:
       - ./api.env
     deploy:
@@ -70,6 +77,9 @@ services:
       - public
       - db-network
       - cache-network
+    depends_on: 
+      - db
+      - cache
     
 networks:
   cache-network:
