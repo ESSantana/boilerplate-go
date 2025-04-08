@@ -14,6 +14,8 @@ type repositoryManager struct {
 	conn *sql.DB
 }
 
+type Scanner interface{ Scan(dest ...any) error }
+
 func NewRepositoryManager(ctx context.Context) interfaces.RepositoryManager {
 	timeLoc, _ := time.LoadLocation("America/Sao_Paulo")
 	cfg := mysql.Config{
@@ -44,6 +46,6 @@ func (rm *repositoryManager) DatabaseHealthCheck() error {
 	return rm.conn.Ping()
 }
 
-func (rm *repositoryManager) NewUserRepository() interfaces.UserRepository {
-	return newUserRepository(rm.conn)
+func (rm *repositoryManager) NewCustomerRepository() interfaces.CustomerRepository {
+	return newCustomerRepository(rm.conn)
 }

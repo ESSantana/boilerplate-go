@@ -5,27 +5,26 @@ import (
 	"os"
 	"time"
 
-	"github.com/application-ellas/ellas-backend/internal/domain/models"
 	"github.com/golang-jwt/jwt/v5"
 )
 
 type CustomClaims struct {
 	jwt.RegisteredClaims
-	UserID string   `json:"user_id"`
-	Name   string   `json:"name"`
-	Roles  []string `json:"roles"`
+	UserID string `json:"user_id"`
+	Name   string `json:"name"`
+	Role   string `json:"role"`
 }
 
-func GenerateAuthToken(user models.User) (string, error) {
+func GenerateAuthToken(userID, userName, userRole string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, CustomClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			NotBefore: jwt.NewNumericDate(time.Now().Add(time.Second * 3)),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 8)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
-		UserID: user.ID,
-		Name:   user.Name,
-		Roles:  user.GetUserRoles(),
+		UserID: userID,
+		Name:   userName,
+		Role:   userRole,
 	})
 
 	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))

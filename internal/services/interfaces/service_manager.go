@@ -2,7 +2,6 @@ package interfaces
 
 type ServiceManager interface {
 	HealthCheck() (dbHealthStatus, cacheHealthStatus bool)
-	NewUserService() UserService
-	NewServiceProviderService() ServiceProviderService
+	NewCustomerService() CustomerService
 	NewProductService() ProductService
 }

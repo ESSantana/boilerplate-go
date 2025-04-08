@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/application-ellas/ellas-backend/internal/controllers"
-	"github.com/application-ellas/ellas-backend/internal/domain/models"
+	"github.com/application-ellas/ellas-backend/internal/domain/constants"
 	"github.com/application-ellas/ellas-backend/internal/routes/middlewares"
 	svc_interfaces "github.com/application-ellas/ellas-backend/internal/services/interfaces"
 	cache_interfaces "github.com/application-ellas/ellas-backend/packages/cache/interfaces"
@@ -29,7 +29,7 @@ func ConfigRoutes(router *chi.Mux, logger log.Logger, serviceManager svc_interfa
 
 	configAuth(router, logger, serviceManager, cacheManager)
 	configPayment(router, logger, serviceManager)
-	configServiceProvider(router, logger, serviceManager, cacheManager)
+	configCustomer(router, logger, serviceManager, cacheManager)
 }
 
 func configAuth(router *chi.Mux, logger log.Logger, serviceManager svc_interfaces.ServiceManager, cacheManager cache_interfaces.CacheManager) {
@@ -41,12 +41,25 @@ func configAuth(router *chi.Mux, logger log.Logger, serviceManager svc_interface
 	})
 }
 
-func configServiceProvider(router *chi.Mux, logger log.Logger, serviceManager svc_interfaces.ServiceManager, cacheManager cache_interfaces.CacheManager) {
-	controller := controllers.NewServiceProviderController(logger, serviceManager, cacheManager)
+func configCustomer(router *chi.Mux, logger log.Logger, serviceManager svc_interfaces.ServiceManager, cacheManager cache_interfaces.CacheManager) {
+	controller := controllers.NewCustomerController(logger, serviceManager, cacheManager)
 
-	router.Route("/service-provider", func(r chi.Router) {
-		r.Use(middlewares.AuthMiddleware([]string{models.RoleAdmin}))
-		r.Post("/create", controller.PromoteUserToServiceProvider)
+	// Anonymous routes
+	router.Route("/customer", func(r chi.Router) {
+		r.Post("/", controller.Create)
+	})
+
+	// Admin and Manager routes
+	router.Route("/customer", func(r chi.Router) {
+		r.Use(middlewares.AuthMiddleware([]string{constants.RoleAdmin, constants.RoleManager}))
+		r.Get("/", controller.GetAllCustomers)
+	})
+
+	router.Route("/customer", func(r chi.Router) {
+		r.Use(middlewares.AuthMiddleware([]string{constants.RoleCustomer, constants.RoleAdmin, constants.RoleManager}))
+		r.Get("/{id}", controller.GetCustomerById)
+		r.Put("/", controller.Update)
+		r.Delete("/", controller.SoftDelete)
 	})
 }
 

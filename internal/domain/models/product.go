@@ -1,61 +1,40 @@
 package models
 
 import (
+	"errors"
+	"strings"
 	"time"
-
-	"github.com/application-ellas/ellas-backend/internal/domain/constants"
-	"github.com/application-ellas/ellas-backend/internal/domain/errors"
-	"github.com/shopspring/decimal"
 )
 
 type Product struct {
-	ID                string     `db:"id" json:"id"`
-	ServiceProviderID string     `db:"service_provider_id" json:"service_provider_id"`
-	Name              string     `db:"name" json:"name"`
-	CategoryID        string     `db:"category_id" json:"category_id"`
-	Description       string     `db:"description" json:"description"`
-	Price             string     `db:"price" json:"price"`
-	Duration          int        `db:"duration" json:"duration"`
-	Latitude          float64    `db:"latitude" json:"latitude"`
-	Longitude         float64    `db:"longitude" json:"longitude"`
-	CreatedAt         time.Time  `db:"created_at" json:"created_at"`
-	UpdatedAt         time.Time  `db:"updated_at" json:"updated_at"`
-	DeletedAt         *time.Time `db:"deleted_at" json:"deleted_at"`
+	ID              string     `db:"id" json:"id"`
+	ProviderID      string     `db:"provider_id" json:"provider_id"`
+	CategoryID      string     `db:"category_id" json:"category_id"`
+	Name            string     `db:"name" json:"name"`
+	Description     *string    `db:"description" json:"description,omitempty"`
+	CreditCost      int        `db:"credit_cost" json:"credit_cost"`
+	AverageDuration int        `db:"average_duration" json:"average_duration"`
+	CreatedAt       time.Time  `db:"created_at" json:"created_at"`
+	UpdateAt        time.Time  `db:"update_at" json:"update_at"`
+	DeletedAt       *time.Time `db:"deleted_at" json:"deleted_at,omitempty"`
 }
 
-func (product *Product) Validate(validationTyep constants.ModelValidationType) error {
-	if product.ServiceProviderID == "" {
-		return errors.NewValidationError("service provider id is required")
+func (p *Product) Validate() error {
+	if strings.TrimSpace(p.ProviderID) == "" {
+		return errors.New("provider_id is required")
 	}
-	if product.Name == "" {
-		return errors.NewValidationError("product name is required")
+	if strings.TrimSpace(p.CategoryID) == "" {
+		return errors.New("category_id is required")
 	}
-	if product.CategoryID == "" {
-		return errors.NewValidationError("product category id is required")
+	if strings.TrimSpace(p.Name) == "" {
+		return errors.New("name is required")
 	}
-	if product.Price == "" {
-		return errors.NewValidationError("product price is required")
+	if p.CreditCost <= 0 {
+		return errors.New("credit_cost must be greater than 0")
 	}
-	if product.Duration <= 0 {
-		return errors.NewValidationError("product duration must be greater than 0")
-	}
-	if product.Latitude < -90 || product.Latitude > 90 {
-		return errors.NewValidationError("product latitude must be between -90 and 90")
-	}
-	if product.Longitude < -180 || product.Longitude > 180 {
-		return errors.NewValidationError("product longitude must be between -180 and 180")
-	}
-
-	if validationTyep == constants.ValidationTypeUpdate {
-		if product.ID == "" {
-			return errors.NewValidationError("product id is required")
-		}
+	if p.AverageDuration <= 0 {
+		return errors.New("average_duration must be greater than 0")
 	}
 
 	return nil
-}
-
-func (product *Product) GetPrice() decimal.Decimal {
-	price, _ := decimal.NewFromString(product.Price)
-	return price
 }

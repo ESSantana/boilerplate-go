@@ -30,10 +30,8 @@ func AuthMiddleware(allowedRoles []string) func(next http.Handler) http.Handler 
 			}
 
 			if jwt.Valid {
-				for _, role := range customClaims.Roles {
-					if slices.Contains(allowedRoles, role) {
-						next.ServeHTTP(response, request)
-					}
+				if slices.Contains(allowedRoles, customClaims.Role) {
+					next.ServeHTTP(response, request)
 				}
 			}
 

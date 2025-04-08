@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/application-ellas/ellas-backend/internal/domain/constants"
+	"github.com/application-ellas/ellas-backend/internal/domain/models"
 	svc_interfaces "github.com/application-ellas/ellas-backend/internal/services/interfaces"
 	"github.com/application-ellas/ellas-backend/internal/utils"
 	cache_interfaces "github.com/application-ellas/ellas-backend/packages/cache/interfaces"
@@ -85,14 +86,21 @@ func (ctlr *AuthController) SSOCallback(response http.ResponseWriter, request *h
 		return
 	}
 
-	userService := ctlr.serviceManager.NewUserService()
-	user, err := userService.CreateUserIfNotExists(ctx, data.Name, data.Email, providerName, data.ExternalID, data.ProfileImageURL)
+	customer := models.Customer{
+		Name:            data.Name,
+		Email:           data.Email,
+		ExternalID:      &data.ExternalID,
+		ProfileImageURL: &data.ProfileImageURL,
+	}
+
+	userService := ctlr.serviceManager.NewCustomerService()
+	customerCreated, err := userService.CreateCustomer(ctx, customer)
 	if err != nil {
 		utils.CreateResponse(&response, http.StatusInternalServerError, err)
 		return
 	}
 
-	token, err := jwt.GenerateAuthToken(user)
+	token, err := jwt.GenerateAuthToken(customerCreated.ID, customerCreated.Name, constants.RoleCustomer)
 	if err != nil {
 		ctlr.logger.Errorf("auth token error: %s", err.Error())
 		utils.CreateResponse(&response, http.StatusInternalServerError, err)

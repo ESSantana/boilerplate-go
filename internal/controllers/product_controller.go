@@ -46,7 +46,7 @@ func (ctlr *ProductController) Create(response http.ResponseWriter, request *htt
 		return
 	}
 
-	err = product.Validate(constants.ValidationTypeCreate)
+	err = product.Validate()
 	if err != nil {
 		utils.CreateResponse(&response, http.StatusBadRequest, err)
 		return
@@ -80,7 +80,7 @@ func (ctlr *ProductController) Update(response http.ResponseWriter, request *htt
 		return
 	}
 
-	err = product.Validate(constants.ValidationTypeUpdate)
+	err = product.Validate()
 	if err != nil {
 		utils.CreateResponse(&response, http.StatusBadRequest, err)
 		return
