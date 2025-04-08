@@ -1,20 +1,4 @@
-GRANT ALL PRIVILEGES ON *.* TO 'admin' @'%' WITH GRANT OPTION;
-
-FLUSH PRIVILEGES;
-
-CREATE USER 'ellas-api' @'%' IDENTIFIED BY '5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8';
-
-GRANT
-SELECT
-,
-INSERT
-,
-UPDATE
-    ON `ellas-db`.* TO 'ellas-api' @'%';
-
-FLUSH PRIVILEGES;
-
-USE `ellas-db`;
+USE `ella-db`;
 
 CREATE TABLE IF NOT EXISTS customer (
     id VARCHAR(36) NOT NULL PRIMARY KEY,

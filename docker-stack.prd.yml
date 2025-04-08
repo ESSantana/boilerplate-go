@@ -25,15 +25,23 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
       - public
+
   db:
     image: mysql:9.2.0
-    env_file:
-      - ./db.env
+    environment:
+      - MYSQL_USER_FILE=/run/secrets/mysql_user
+      - MYSQL_PASSWORD_FILE=/run/secrets/mysql_password
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/mysql_root_password
+      - MYSQL_DATABASE_FILE=/run/secrets/mysql_database
     ports:
       - 3306:3306
     volumes:
-      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
       - /var/lib/mysql:/var/lib/mysql
+    secrets:
+      - mysql_user
+      - mysql_password
+      - mysql_root_password
+      - mysql_database
     networks:
       - db-network
     healthcheck:
@@ -44,14 +52,15 @@ services:
 
   cache:
     image: redis:7.4.2
-    command: redis-server /usr/local/etc/redis/redis.conf
+    command: redis-server --requirepass "$$(cat /run/secrets/redis_password)" --port 6379 --loglevel warning --save 60 1 --maxclients 1000 --maxmemory 1gb
     volumes:
-      - ./redis.conf:/usr/local/etc/redis/redis.conf
       - /var/redis:/var/run
     ports:
       - 6379:6379
     networks:
       - cache-network
+    secrets:
+      - redis_password
     healthcheck:
       test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
       start_period: 5s
@@ -90,3 +99,15 @@ networks:
     driver: overlay
   public:
     driver: overlay
+
+secrets:
+  mysql_user:
+    external: true
+  mysql_password:
+    external: true
+  mysql_root_password:
+    external: true
+  mysql_database:
+    external: true
+  redis_password:
+    external: true

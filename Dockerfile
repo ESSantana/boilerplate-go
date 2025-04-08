@@ -7,17 +7,17 @@ COPY go.mod go.sum ./
 
 COPY . ./
 
-RUN CGO_ENABLE=1 GOOS=linux go build -o /ellas-api ./cmd/api/main.go
+RUN CGO_ENABLE=1 GOOS=linux go build -o /ella-api ./cmd/api/main.go
 
 # SETUP CONTAINER RELEASE
 FROM gcr.io/distroless/base-debian12 AS release-stage
 
 WORKDIR /
 
-COPY --from=build-stage /ellas-api /ellas-api
+COPY --from=build-stage /ella-api /ella-api
 
 EXPOSE 8080
 
 USER root:root
 
-ENTRYPOINT ["/ellas-api"]
+ENTRYPOINT ["/ella-api"]

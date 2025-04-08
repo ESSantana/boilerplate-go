@@ -45,21 +45,21 @@ func configCustomer(router *chi.Mux, logger log.Logger, serviceManager svc_inter
 	controller := controllers.NewCustomerController(logger, serviceManager, cacheManager)
 
 	// Anonymous routes
-	router.Route("/customer", func(r chi.Router) {
-		r.Post("/", controller.Create)
+	router.Group(func(r chi.Router) {
+		r.Post("/customer", controller.Create)
 	})
 
 	// Admin and Manager routes
-	router.Route("/customer", func(r chi.Router) {
+	router.Group(func(r chi.Router) {
 		r.Use(middlewares.AuthMiddleware([]string{constants.RoleAdmin, constants.RoleManager}))
-		r.Get("/", controller.GetAllCustomers)
+		r.Get("/customer", controller.GetAllCustomers)
 	})
 
-	router.Route("/customer", func(r chi.Router) {
+	router.Group(func(r chi.Router) {
 		r.Use(middlewares.AuthMiddleware([]string{constants.RoleCustomer, constants.RoleAdmin, constants.RoleManager}))
-		r.Get("/{id}", controller.GetCustomerById)
-		r.Put("/", controller.Update)
-		r.Delete("/", controller.SoftDelete)
+		r.Get("/customer/{id}", controller.GetCustomerById)
+		r.Put("/customer/", controller.Update)
+		r.Delete("/customer/", controller.SoftDelete)
 	})
 }
 

@@ -55,9 +55,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: create env file
+      - name: Create env file
         run: |
           echo "GIT_COMMIT_HASH=${{ github.sha }}" >> ./envfile
+
+      - name: Create Secrets
+        run: |
+          docker secret create mysql_user ${{ secrets.MYSQL_USER }}
+          docker secret create mysql_password ${{ secrets.MYSQL_PASSWORD }}
+          docker secret create mysql_root_password ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          docker secret create mysql_database ${{ secrets.MYSQL_DATABASE }}
+          docker secret create mysql_host ${{ secrets.MYSQL_HOST }}
+          docker secret create redis_password ${{ secrets.REDIS_REQUIRED_PASSWORD }}
 
       - name: Docker Stack Deploy
         uses: cssnr/stack-deploy-action@v1
