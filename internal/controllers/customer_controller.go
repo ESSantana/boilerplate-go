@@ -8,13 +8,13 @@ import (
 
 	"net/http"
 
-	"github.com/application-ellas/ellas-backend/internal/domain/constants"
-	"github.com/application-ellas/ellas-backend/internal/domain/models"
-	svc_interfaces "github.com/application-ellas/ellas-backend/internal/services/interfaces"
-	"github.com/application-ellas/ellas-backend/internal/utils"
-	cache_interfaces "github.com/application-ellas/ellas-backend/packages/cache/interfaces"
-	"github.com/application-ellas/ellas-backend/packages/jwt"
-	"github.com/application-ellas/ellas-backend/packages/log"
+	"github.com/application-ellas/ella-backend/internal/domain/constants"
+	"github.com/application-ellas/ella-backend/internal/domain/models"
+	svc_interfaces "github.com/application-ellas/ella-backend/internal/services/interfaces"
+	"github.com/application-ellas/ella-backend/internal/utils"
+	cache_interfaces "github.com/application-ellas/ella-backend/packages/cache/interfaces"
+	"github.com/application-ellas/ella-backend/packages/jwt"
+	"github.com/application-ellas/ella-backend/packages/log"
 	"github.com/go-chi/chi/v5"
 )
 

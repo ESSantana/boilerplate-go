@@ -1,10 +1,10 @@
 package services
 
 import (
-	repo_interfaces "github.com/application-ellas/ellas-backend/internal/repositories/interfaces"
-	"github.com/application-ellas/ellas-backend/internal/services/interfaces"
-	cache_interfaces "github.com/application-ellas/ellas-backend/packages/cache/interfaces"
-	"github.com/application-ellas/ellas-backend/packages/log"
+	repo_interfaces "github.com/application-ellas/ella-backend/internal/repositories/interfaces"
+	"github.com/application-ellas/ella-backend/internal/services/interfaces"
+	cache_interfaces "github.com/application-ellas/ella-backend/packages/cache/interfaces"
+	"github.com/application-ellas/ella-backend/packages/log"
 )
 
 type serviceManager struct {
@@ -41,7 +41,6 @@ func (sm *serviceManager) HealthCheck() (dbHealthStatus, cacheHealthStatus bool)
 func (sm *serviceManager) NewCustomerService() interfaces.CustomerService {
 	return newCustomerService(sm.logger, sm.repoManager)
 }
-
 
 func (sm *serviceManager) NewProductService() interfaces.ProductService {
 	return newProductService(sm.logger, sm.repoManager)

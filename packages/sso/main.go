@@ -3,9 +3,9 @@ package sso
 import (
 	"errors"
 
-	cache_interfaces "github.com/application-ellas/ellas-backend/packages/cache/interfaces"
-	"github.com/application-ellas/ellas-backend/packages/sso/interfaces"
-	"github.com/application-ellas/ellas-backend/packages/sso/providers"
+	cache_interfaces "github.com/application-ellas/ella-backend/packages/cache/interfaces"
+	"github.com/application-ellas/ella-backend/packages/sso/interfaces"
+	"github.com/application-ellas/ella-backend/packages/sso/providers"
 )
 
 type GoogleProvider struct {

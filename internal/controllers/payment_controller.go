@@ -6,13 +6,13 @@ import (
 
 	"net/http"
 
-	"github.com/application-ellas/ellas-backend/internal/domain/constants"
-	"github.com/application-ellas/ellas-backend/internal/domain/dto"
-	svc_interfaces "github.com/application-ellas/ellas-backend/internal/services/interfaces"
-	"github.com/application-ellas/ellas-backend/internal/utils"
-	"github.com/application-ellas/ellas-backend/packages/log"
-	"github.com/application-ellas/ellas-backend/packages/payment"
-	payment_interfaces "github.com/application-ellas/ellas-backend/packages/payment/interfaces"
+	"github.com/application-ellas/ella-backend/internal/domain/constants"
+	"github.com/application-ellas/ella-backend/internal/domain/dto"
+	svc_interfaces "github.com/application-ellas/ella-backend/internal/services/interfaces"
+	"github.com/application-ellas/ella-backend/internal/utils"
+	"github.com/application-ellas/ella-backend/packages/log"
+	"github.com/application-ellas/ella-backend/packages/payment"
+	payment_interfaces "github.com/application-ellas/ella-backend/packages/payment/interfaces"
 )
 
 type PaymentController struct {

@@ -3,7 +3,7 @@ package interfaces
 import (
 	"context"
 
-	"github.com/application-ellas/ellas-backend/internal/domain/dto"
+	"github.com/application-ellas/ella-backend/internal/domain/dto"
 	"github.com/mercadopago/sdk-go/pkg/preference"
 )
 

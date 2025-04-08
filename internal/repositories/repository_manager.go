@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/application-ellas/ellas-backend/internal/repositories/interfaces"
+	"github.com/application-ellas/ella-backend/internal/repositories/interfaces"
 	"github.com/go-sql-driver/mysql"
 )
 

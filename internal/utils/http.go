@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/application-ellas/ellas-backend/internal/domain/dto"
+	"github.com/application-ellas/ella-backend/internal/domain/dto"
 )
 
 func CreateResponse(response *http.ResponseWriter, statusCode int, err error, data ...any) {

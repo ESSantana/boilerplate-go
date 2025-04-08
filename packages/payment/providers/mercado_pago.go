@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/application-ellas/ellas-backend/internal/domain/dto"
-	"github.com/application-ellas/ellas-backend/packages/log"
-	"github.com/application-ellas/ellas-backend/packages/payment/interfaces"
+	"github.com/application-ellas/ella-backend/internal/domain/dto"
+	"github.com/application-ellas/ella-backend/packages/log"
+	"github.com/application-ellas/ella-backend/packages/payment/interfaces"
 	"github.com/mercadopago/sdk-go/pkg/config"
 	"github.com/mercadopago/sdk-go/pkg/preference"
 )

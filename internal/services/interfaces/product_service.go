@@ -3,7 +3,7 @@ package interfaces
 import (
 	"context"
 
-	"github.com/application-ellas/ellas-backend/internal/domain/models"
+	"github.com/application-ellas/ella-backend/internal/domain/models"
 )
 
 type ProductService interface {

@@ -2,11 +2,12 @@ package services
 
 import (
 	"context"
-	"github.com/application-ellas/ellas-backend/internal/domain/models"
-	repo_interfaces "github.com/application-ellas/ellas-backend/internal/repositories/interfaces"
-	"github.com/application-ellas/ellas-backend/internal/services/interfaces"
 
-	"github.com/application-ellas/ellas-backend/packages/log"
+	"github.com/application-ellas/ella-backend/internal/domain/models"
+	repo_interfaces "github.com/application-ellas/ella-backend/internal/repositories/interfaces"
+	"github.com/application-ellas/ella-backend/internal/services/interfaces"
+
+	"github.com/application-ellas/ella-backend/packages/log"
 )
 
 type productService struct {

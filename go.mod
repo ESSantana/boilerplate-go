@@ -1,4 +1,4 @@
-module github.com/application-ellas/ellas-backend
+module github.com/application-ellas/ella-backend
 
 go 1.24
 
