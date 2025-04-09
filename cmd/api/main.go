@@ -65,6 +65,7 @@ func startServer(router *chi.Mux) {
 }
 
 func singletonRepository(ctx context.Context) {
+	fmt.Println("Connecting to MySQL...")
 	if repoManager != nil {
 		return
 	}
@@ -79,6 +80,7 @@ func singletonService(logger log.Logger) {
 }
 
 func singletonCache() {
+	logger.Info("Connecting to Redis...")
 	if cacheManager != nil {
 		return
 	}

@@ -3,11 +3,11 @@ package repositories
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"os"
 	"time"
 
 	"github.com/application-ellas/ella-backend/internal/repositories/interfaces"
+	"github.com/application-ellas/ella-backend/internal/utils"
 	"github.com/go-sql-driver/mysql"
 )
 
@@ -18,21 +18,10 @@ type repositoryManager struct {
 type Scanner interface{ Scan(dest ...any) error }
 
 func NewRepositoryManager(ctx context.Context) interfaces.RepositoryManager {
-	fmt.Println("Connecting to MySQL database...")
-	data, err := os.ReadFile(os.Getenv("DB_PASS"))
-	if err != nil {
-		return &repositoryManager{}
-	}
-	fmt.Println("DB_PASS:", string(data))
-
-	fmt.Println("DB_USER:", os.Getenv("DB_USER"))
-	fmt.Println("DB_HOST:", os.Getenv("DB_HOST"))
-	fmt.Println("DB_NAME:", os.Getenv("DB_NAME"))
-
 	timeLoc, _ := time.LoadLocation("America/Sao_Paulo")
 	cfg := mysql.Config{
-		User:                 os.Getenv("DB_USER"),
-		Passwd:               os.Getenv("DB_PASS"),
+		User:                 utils.RetrieveSecretValue("DB_USER"),
+		Passwd:               utils.RetrieveSecretValue("DB_PASS"),
 		Net:                  "tcp",
 		Addr:                 os.Getenv("DB_HOST"),
 		DBName:               os.Getenv("DB_NAME"),

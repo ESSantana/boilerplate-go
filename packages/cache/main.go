@@ -2,10 +2,10 @@ package cache
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"time"
 
+	"github.com/application-ellas/ella-backend/internal/utils"
 	"github.com/application-ellas/ella-backend/packages/cache/interfaces"
 	"github.com/redis/go-redis/v9"
 )
@@ -15,14 +15,11 @@ type cacheManager struct {
 }
 
 func NewCacheManager() interfaces.CacheManager {
-	fmt.Println("Connecting to Redis database...")
-	fmt.Println("REDIS_HOST:", os.Getenv("REDIS_HOST"))
-	fmt.Println("REDIS_USER:", os.Getenv("REDIS_USER"))
-	fmt.Println("REDIS_PASSWORD:", os.Getenv("REDIS_PASSWORD"))
+
 	client := redis.NewClient(&redis.Options{
 		Addr:     os.Getenv("REDIS_HOST"),
-		Username: os.Getenv("REDIS_USER"),
-		Password: os.Getenv("REDIS_PASSWORD"),
+		Username: utils.RetrieveSecretValue("REDIS_USER"),
+		Password: utils.RetrieveSecretValue("REDIS_PASSWORD"),
 		DB:       0,
 	})
 
