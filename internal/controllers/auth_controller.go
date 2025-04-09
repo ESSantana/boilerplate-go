@@ -30,7 +30,7 @@ func NewAuthController(logger log.Logger, serviceManager svc_interfaces.ServiceM
 	ssoManager := sso.NewSSOManager(
 		cacheManager,
 		sso.GoogleProvider{
-			RedirectURL:  os.Getenv("REDIRECT_URL"),
+			RedirectURL:  os.Getenv("GOOGLE_REDIRECT_URL"),
 			ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
 			ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
 		},
