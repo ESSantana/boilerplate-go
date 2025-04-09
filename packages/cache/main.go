@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"time"
 
@@ -14,6 +15,10 @@ type cacheManager struct {
 }
 
 func NewCacheManager() interfaces.CacheManager {
+	fmt.Println("Connecting to Redis database...")
+	fmt.Println("REDIS_HOST:", os.Getenv("REDIS_HOST"))
+	fmt.Println("REDIS_USER:", os.Getenv("REDIS_USER"))
+	fmt.Println("REDIS_PASSWORD:", os.Getenv("REDIS_PASSWORD"))
 	client := redis.NewClient(&redis.Options{
 		Addr:     os.Getenv("REDIS_HOST"),
 		Username: os.Getenv("REDIS_USER"),
