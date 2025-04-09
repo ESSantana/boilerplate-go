@@ -19,11 +19,16 @@ type Scanner interface{ Scan(dest ...any) error }
 
 func NewRepositoryManager(ctx context.Context) interfaces.RepositoryManager {
 	fmt.Println("Connecting to MySQL database...")
+	data, err := os.ReadFile(os.Getenv("DB_PASS"))
+	if err != nil {
+		return &repositoryManager{}
+	}
+	fmt.Println("DB_PASS:", string(data))
+
 	fmt.Println("DB_USER:", os.Getenv("DB_USER"))
-	fmt.Println("DB_PASS:", os.Getenv("DB_PASS"))
 	fmt.Println("DB_HOST:", os.Getenv("DB_HOST"))
 	fmt.Println("DB_NAME:", os.Getenv("DB_NAME"))
-	
+
 	timeLoc, _ := time.LoadLocation("America/Sao_Paulo")
 	cfg := mysql.Config{
 		User:                 os.Getenv("DB_USER"),
