@@ -59,15 +59,6 @@ jobs:
         run: |
           echo "GIT_COMMIT_HASH=${{ github.sha }}" >> ./envfile
 
-      - name: Create Secrets
-        run: |
-          ${{ secrets.MYSQL_USER }} | docker secret create mysql_user - 
-          ${{ secrets.MYSQL_PASSWORD }} | docker secret create mysql_password - 
-          ${{ secrets.MYSQL_ROOT_PASSWORD }} | docker secret create mysql_root_password - 
-          ${{ secrets.MYSQL_DATABASE }} | docker secret create mysql_database - 
-          ${{ secrets.MYSQL_HOST }} | docker secret create mysql_host - 
-          ${{ secrets.REDIS_REQUIRED_PASSWORD }} | docker secret create redis_password -
-
       - name: Docker Stack Deploy
         uses: cssnr/stack-deploy-action@v1
         with:
