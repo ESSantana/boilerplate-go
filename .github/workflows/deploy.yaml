@@ -68,3 +68,7 @@ jobs:
           user: github-actions-deploy
           ssh_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
           env_file: ./envfile
+          registry_auth: true
+          registry_host: "ghcr.io"
+          registry_user: application-ellas
+          registry_pass: ${{ secrets.GHCR_TOKEN }}
