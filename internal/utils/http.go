@@ -2,19 +2,19 @@ package utils
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
 	"net/http"
 
 	"github.com/application-ellas/ella-backend/internal/domain/dto"
+	"github.com/application-ellas/ella-backend/internal/domain/errors"
 )
 
-func CreateResponse(response *http.ResponseWriter, statusCode int, err error, data ...any) {
+func CreateResponse(response *http.ResponseWriter, statusCode int, responseErr error, data ...any) {
 	var body dto.HttpResponse
-	if err != nil {
+	if responseErr != nil {
 		body = dto.HttpResponse{
 			Error:   true,
-			Message: err.Error(),
+			Message: responseErr.Error(),
 		}
 	} else {
 		body = dto.HttpResponse{
@@ -27,6 +27,15 @@ func CreateResponse(response *http.ResponseWriter, statusCode int, err error, da
 	if err != nil {
 		panic(errors.New("something went wrong on http utils "))
 	}
+
+	if _, ok := responseErr.(*errors.ValidationError); ok {
+		statusCode = http.StatusUnprocessableEntity
+	}
+
+	if _, ok := responseErr.(*errors.NotFoundError); ok {
+		statusCode = http.StatusNotFound
+	}
+
 	(*response).WriteHeader(statusCode)
 	(*response).Write(bodyResponse)
 	(*response).Header().Set("Content-Type", "application/json")

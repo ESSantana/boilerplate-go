@@ -1,25 +1,4 @@
-services:
-  traefik:
-    image: traefik:v3.3
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entryPoints.web.address=:80"
-    ports:
-      - mode: host
-        protocol: tcp
-        published: 8080
-        target: 8080
-      - mode: host
-        protocol: tcp
-        published: 80
-        target: 80
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-    networks:
-      - public
-  
+services:  
   db:
     image: mysql:9.2.0
     environment:
@@ -43,10 +22,10 @@ services:
   cache:
     image: redis:7.4.2
     command: redis-server --requirepass "development" --port 6379 --loglevel warning --save 60 1 --maxclients 1000 --maxmemory 1gb
-    volumes:
-      - ../data/redis:/var/run
     ports:
       - 6379:6379
+    volumes:
+      - ../data/redis:/var/run
     networks:
       - cache-network
     healthcheck:
@@ -57,22 +36,25 @@ services:
 
   ellaapi:
     image: ella-backend:local
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.ellaapi.loadbalancer.server.port=8080"
-      - "traefik.http.routers.ellaapi.rule=Host(`localhost`)"
-      - "traefik.http.routers.ellaapi.entrypoints=web"
-    env_file:
-      - ./api.env
-    deploy:
-      update_config:
-        order: start-first
-      mode: replicated
-      replicas: 2
-    volumes:
-      - .:/app
+    environment:
+      - DB_USER=ella-api
+      - DB_PASS=password
+      - REDIS_USER=ella-api
+      - REDIS_PASSWORD=password
+      - GOOGLE_CLIENT_ID=14302173819-3rfe2jq2ptfg53njtvmrgtmhlqom435a.apps.googleusercontent.com
+      - GOOGLE_CLIENT_SECRET=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
+      - MERCADO_PAGO_TOKEN=TEST-2332090575580034-111111-2b4a678d9a00053264d90a30dbd2aac0-494198267
+      - JWT_SECRET_KEY=mock-jwt-token
+      - GOOGLE_REDIRECT_URL=https://localhost/auth/callback/google
+      - DB_HOST=db:3306
+      - DB_NAME=ella-db
+      - SERVER_PORT=8080
+      - REDIS_HOST=cache:6379
+      - FRONTEND_URL=http://localhost:3000/
+      - AWS_DEFAULT_REGION=sa-east-1
+    ports:
+      - 8080:8080
     networks:
-      - public
       - db-network
       - cache-network
     depends_on:
@@ -84,5 +66,4 @@ networks:
     driver: overlay
   db-network:
     driver: overlay
-  public:
-    driver: overlay
+

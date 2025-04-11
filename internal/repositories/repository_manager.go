@@ -15,7 +15,10 @@ type repositoryManager struct {
 	conn *sql.DB
 }
 
-type Scanner interface{ Scan(dest ...any) error }
+type Scanner interface {
+	Scan(dest ...any) error
+	Err() error
+}
 
 func NewRepositoryManager(ctx context.Context) interfaces.RepositoryManager {
 	timeLoc, _ := time.LoadLocation("America/Sao_Paulo")

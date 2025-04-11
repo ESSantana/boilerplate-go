@@ -3,8 +3,8 @@ package controllers
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
-	"os"
 
 	"net/http"
 
@@ -77,14 +77,14 @@ func (ctlr *CustomerController) Create(response http.ResponseWriter, request *ht
 
 	body, err := io.ReadAll(request.Body)
 	if err != nil {
-		utils.CreateResponse(&response, http.StatusBadRequest, err)
+		utils.CreateResponse(&response, http.StatusBadRequest, errors.New("payload format is invalid"))
 		return
 	}
 
 	var customer models.Customer
 	err = json.Unmarshal(body, &customer)
 	if err != nil {
-		utils.CreateResponse(&response, http.StatusBadRequest, err)
+		utils.CreateResponse(&response, http.StatusBadRequest, errors.New("payload format is invalid"))
 		return
 	}
 	ctlr.logger.Debugf("customer received: %v", customer)
@@ -103,8 +103,11 @@ func (ctlr *CustomerController) Create(response http.ResponseWriter, request *ht
 		return
 	}
 
-	url := os.Getenv("FRONTEND_URL") + "?token=" + token
-	http.Redirect(response, request, url, http.StatusSeeOther)
+	responseData := map[string]any{
+		"token": token,
+	}
+
+	utils.CreateResponse(&response, http.StatusCreated, nil, responseData)
 }
 
 func (ctlr *CustomerController) Update(response http.ResponseWriter, request *http.Request) {
@@ -113,14 +116,14 @@ func (ctlr *CustomerController) Update(response http.ResponseWriter, request *ht
 
 	body, err := io.ReadAll(request.Body)
 	if err != nil {
-		utils.CreateResponse(&response, http.StatusBadRequest, err)
+		utils.CreateResponse(&response, http.StatusBadRequest, errors.New("payload format is invalid"))
 		return
 	}
 
 	var customer models.Customer
 	err = json.Unmarshal(body, &customer)
 	if err != nil {
-		utils.CreateResponse(&response, http.StatusBadRequest, err)
+		utils.CreateResponse(&response, http.StatusBadRequest, errors.New("payload format is invalid"))
 		return
 	}
 	ctlr.logger.Debugf("customer received: %v", customer)
@@ -140,14 +143,14 @@ func (ctlr *CustomerController) SoftDelete(response http.ResponseWriter, request
 
 	body, err := io.ReadAll(request.Body)
 	if err != nil {
-		utils.CreateResponse(&response, http.StatusBadRequest, err)
+		utils.CreateResponse(&response, http.StatusBadRequest, errors.New("payload format is invalid"))
 		return
 	}
 
 	var customer models.Customer
 	err = json.Unmarshal(body, &customer)
 	if err != nil {
-		utils.CreateResponse(&response, http.StatusBadRequest, err)
+		utils.CreateResponse(&response, http.StatusBadRequest, errors.New("payload format is invalid"))
 		return
 	}
 	ctlr.logger.Debugf("customer received: %v", customer)

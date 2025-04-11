@@ -58,8 +58,8 @@ func configCustomer(router *chi.Mux, logger log.Logger, serviceManager svc_inter
 	router.Group(func(r chi.Router) {
 		r.Use(middlewares.AuthMiddleware([]string{constants.RoleCustomer, constants.RoleAdmin, constants.RoleManager}))
 		r.Get("/customer/{id}", controller.GetCustomerById)
-		r.Put("/customer/", controller.Update)
-		r.Delete("/customer/", controller.SoftDelete)
+		r.Put("/customer", controller.Update)
+		r.Delete("/customer", controller.SoftDelete)
 	})
 }
 

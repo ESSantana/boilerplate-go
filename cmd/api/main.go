@@ -65,7 +65,7 @@ func startServer(router *chi.Mux) {
 }
 
 func singletonRepository(ctx context.Context) {
-	fmt.Println("Connecting to MySQL...")
+	logger.Info("Connecting to MySQL...")
 	if repoManager != nil {
 		return
 	}

@@ -4,6 +4,10 @@ import (
 	"fmt"
 )
 
+func New(message string) error {
+	return fmt.Errorf("%s", message)
+}
+
 type ValidationError struct {
 	message string
 }
@@ -13,7 +17,7 @@ func NewValidationError(message string) error {
 }
 
 func (e *ValidationError) Error() string {
-	return fmt.Sprintf("validation error: %s", e.message)
+	return e.message
 }
 
 type NotFoundError struct {
@@ -25,7 +29,7 @@ func NewNotFoundError(message string) error {
 }
 
 func (e *NotFoundError) Error() string {
-	return fmt.Sprintf("not found error: %s", e.message)
+	return e.message
 }
 
 type OperationError struct {
@@ -37,5 +41,5 @@ func NewOperationError(message string) error {
 }
 
 func (e *OperationError) Error() string {
-	return fmt.Sprintf("operation error: %s", e.message)
+	return e.message
 }

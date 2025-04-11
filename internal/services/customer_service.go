@@ -25,50 +25,55 @@ func newCustomerService(logger log.Logger, repoManager repo_interfaces.Repositor
 	}
 }
 
-func (svc *customerService) GetCustomerById(ctx context.Context, id string) (user models.Customer, err error) {
+func (svc *customerService) GetCustomerById(ctx context.Context, id string) (customer models.Customer, err error) {
 	customerRepo := svc.repoManager.NewCustomerRepository()
-	user, err = customerRepo.GetCustomerById(ctx, id)
+	customer, err = customerRepo.GetCustomerById(ctx, id)
 	if err != nil {
-		return user, errors.NewNotFoundError("customer not found")
+		return customer, errors.NewNotFoundError("customer not found")
 	}
-	return user, nil
+	return customer, nil
 }
 
-func (svc *customerService) GetCustomerByExternalId(ctx context.Context, externalID string) (user models.Customer, err error) {
+func (svc *customerService) GetCustomerByExternalId(ctx context.Context, externalID string) (customer models.Customer, err error) {
 	customerRepo := svc.repoManager.NewCustomerRepository()
-	user, err = customerRepo.GetCustomerByExternalID(ctx, externalID)
-	if err != nil {
-		return user, errors.NewNotFoundError("customer not found")
+	customer, err = customerRepo.GetCustomerByExternalID(ctx, externalID)
+
+	if err != nil && !strings.Contains(err.Error(), "no rows in result set") {
+		svc.logger.Errorf("error at customerRepo.GetCustomerByExternalID: %s", err.Error())
+		return customer, err
 	}
-	return user, nil
+	return customer, nil
 }
 
-func (svc *customerService) GetAllCustomers(ctx context.Context) (users []models.Customer, err error) {
+func (svc *customerService) GetAllCustomers(ctx context.Context) (customers []models.Customer, err error) {
 	customerRepo := svc.repoManager.NewCustomerRepository()
-	users, err = customerRepo.GetAllCustomers(ctx)
-	if err != nil {
-		return users, errors.NewNotFoundError("any customer found")
+	customers, err = customerRepo.GetAllCustomers(ctx)
+
+	if err != nil && !strings.Contains(err.Error(), "no rows in result set") {
+		svc.logger.Errorf("error at customerRepo.GetAllCustomers: %s", err.Error())
+		return customers, err
 	}
-	return users, nil
+	return customers, nil
 }
 
 func (svc *customerService) CreateCustomer(ctx context.Context, customer models.Customer) (customerCreated models.Customer, err error) {
 	customerRepo := svc.repoManager.NewCustomerRepository()
-	customerPersisted, err := customerRepo.GetCustomerEmail(ctx, customer.Email)
-	if err != nil && !strings.Contains(err.Error(), "error scanning customer") {
-		return customerCreated, errors.NewNotFoundError("customer not found")
-	}
-
-	if customerPersisted.ID != "" {
-		return customerCreated, errors.NewValidationError("customer already exists")
-	}
 
 	customer.ID = uuid.New().String()
-	customer.ExternalID = &customer.ID
 	customer.ProviderOrigin = constants.ProviderOriginInternal
 
 	if errValidation := customer.Validate(); errValidation != nil {
 		return customerCreated, errors.NewValidationError(errValidation.Error())
+	}
+
+	customerPersisted, err := customerRepo.GetCustomerEmail(ctx, customer.Email)
+	if err != nil && !strings.Contains(err.Error(), "no rows in result set") {
+		svc.logger.Errorf("error at customerRepo.GetCustomerEmail: %s", err.Error())
+		return customerCreated, err
+	}
+
+	if customerPersisted.ID != "" {
+		return customerCreated, errors.NewValidationError("customer already exists")
 	}
 
 	err = customerRepo.CreateCustomer(ctx, customer)
@@ -83,13 +88,21 @@ func (svc *customerService) CreateCustomer(ctx context.Context, customer models.
 func (svc *customerService) UpdateCustomer(ctx context.Context, customer models.Customer) error {
 	customerRepo := svc.repoManager.NewCustomerRepository()
 
+	_, err := customerRepo.GetCustomerById(ctx, customer.ID)
+	if err != nil {
+		if strings.Contains(err.Error(), "no rows in result set") {
+			return errors.NewValidationError("customer not found")
+		}
+		return err
+	}
+
 	if errValidation := customer.Validate(); errValidation != nil {
 		return errors.NewValidationError(errValidation.Error())
 	}
 
-	err := customerRepo.UpdateCustomer(ctx, customer)
+	err = customerRepo.UpdateCustomer(ctx, customer)
 	if err != nil {
-		svc.logger.Errorf("error at ucustomerRepo.UpdateCustomer: %s", err.Error())
+		svc.logger.Errorf("error at customerRepo.UpdateCustomer: %s", err.Error())
 		return errors.NewOperationError("error updating customer registry")
 	}
 	return nil
@@ -97,7 +110,16 @@ func (svc *customerService) UpdateCustomer(ctx context.Context, customer models.
 
 func (svc *customerService) SoftDeleteCustomer(ctx context.Context, id string) error {
 	customerRepo := svc.repoManager.NewCustomerRepository()
-	err := customerRepo.SoftDeleteCustomer(ctx, id)
+
+	_, err := customerRepo.GetCustomerById(ctx, id)
+	if err != nil {
+		if strings.Contains(err.Error(), "no rows in result set") {
+			return errors.NewValidationError("customer not found")
+		}
+		return err
+	}
+
+	err = customerRepo.SoftDeleteCustomer(ctx, id)
 	if err != nil {
 		svc.logger.Errorf("error at customerRepo.SoftDeleteCustomer: %s", err.Error())
 		return errors.NewOperationError("error deleting customer registry")

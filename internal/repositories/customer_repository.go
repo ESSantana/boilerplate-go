@@ -81,7 +81,7 @@ func (r *customerRepository) CreateCustomer(ctx context.Context, customer models
 			profile_image_url,
 			interests,
 			how_heard_about_us,
-			preferred_comunication_channel
+			preferred_communication_channel
 		)
 	VALUES
 		(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -115,7 +115,7 @@ func (r *customerRepository) UpdateCustomer(ctx context.Context, customer models
 		address_zip_code = ?,
 		profile_image_url = ?,
 		interests = ?,
-		preferred_comunication_channel = ?
+		preferred_communication_channel = ?
 	WHERE
 		id = ?
 		AND deleted_at IS NULL

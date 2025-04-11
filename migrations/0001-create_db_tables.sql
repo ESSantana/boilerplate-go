@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS customer (
     profile_image_url TEXT,
     interests TEXT,
     how_heard_about_us TEXT,
-    preferred_comunication_channel ENUM(
+    preferred_communication_channel ENUM(
         'email',
         'sms',
         'whatsapp',
