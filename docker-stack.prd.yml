@@ -12,8 +12,14 @@ services:
             - "--entryPoints.websecure.http.redirections.entryPoint.to=websecure"
             - "--entryPoints.websecure.http.redirections.entryPoint.scheme=https"
         ports:
-            - 80:80
-            - 443:443
+            - mode: host
+              protocol: tcp
+              published: 80
+              target: 80
+            - mode: host
+              protocol: tcp
+              published: 443
+              target: 443
         volumes:
             - letsencrypt:/letsencrypt
             - "/var/run/docker.sock:/var/run/docker.sock:ro"
