@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/application-ellas/ella-backend/internal/domain/constants"
+	"github.com/application-ellas/ella-backend/internal/domain/dto"
 	"github.com/application-ellas/ella-backend/internal/domain/models"
 	svc_interfaces "github.com/application-ellas/ella-backend/internal/services/interfaces"
 	"github.com/application-ellas/ella-backend/internal/utils"
@@ -103,8 +104,8 @@ func (ctlr *CustomerController) Create(response http.ResponseWriter, request *ht
 		return
 	}
 
-	responseData := map[string]any{
-		"token": token,
+	responseData := dto.LoginResponse{
+		Token: token,
 	}
 
 	utils.CreateResponse(&response, http.StatusCreated, nil, responseData)

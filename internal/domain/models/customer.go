@@ -42,6 +42,9 @@ func (c *Customer) Validate() error {
 	if strings.TrimSpace(c.Email) == "" {
 		return errors.New("email is required")
 	}
+	if c.PasswordHash != nil && strings.TrimSpace(*c.PasswordHash) == "" {
+		return errors.New("password_hash is required")
+	}
 	if c.BirthDate.IsZero() {
 		return errors.New("birth_date is required")
 	}

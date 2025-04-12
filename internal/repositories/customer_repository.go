@@ -18,6 +18,21 @@ func newCustomerRepository(conn *sql.DB) interfaces.CustomerRepository {
 	}
 }
 
+func (r *customerRepository) GetCustomerLogin(ctx context.Context, email string, passwordHash string) (customer models.Customer, err error) {
+	query := `
+		SELECT
+			*
+		FROM
+			customer
+		WHERE
+			email = ?
+			AND password_hash = ?
+			AND deleted_at IS NULL;
+	`
+	row := r.conn.QueryRowContext(ctx, query, email, passwordHash)
+	return scanCustomer(row)
+}
+
 func (r *customerRepository) GetCustomerById(ctx context.Context, id string) (customer models.Customer, err error) {
 	query := `SELECT * FROM customer WHERE id = ? AND deleted_at IS NULL`
 	row := r.conn.QueryRowContext(ctx, query, id)
@@ -164,5 +179,6 @@ func scanCustomer(scanner Scanner) (c models.Customer, err error) {
 		&c.UpdatedAt,
 		&c.DeletedAt,
 	)
+	c.PasswordHash = nil // Do not return the password hash
 	return c, err
 }

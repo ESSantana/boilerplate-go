@@ -2,16 +2,21 @@ package controllers
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 	"time"
 
 	"net/http"
 
 	"github.com/application-ellas/ella-backend/internal/domain/constants"
+	"github.com/application-ellas/ella-backend/internal/domain/dto"
+	"github.com/application-ellas/ella-backend/internal/domain/errors"
 	"github.com/application-ellas/ella-backend/internal/domain/models"
 	svc_interfaces "github.com/application-ellas/ella-backend/internal/services/interfaces"
 	"github.com/application-ellas/ella-backend/internal/utils"
 	cache_interfaces "github.com/application-ellas/ella-backend/packages/cache/interfaces"
+	"github.com/application-ellas/ella-backend/packages/email"
+	email_interfaces "github.com/application-ellas/ella-backend/packages/email/interfaces"
 	"github.com/application-ellas/ella-backend/packages/jwt"
 	"github.com/application-ellas/ella-backend/packages/log"
 	"github.com/application-ellas/ella-backend/packages/sso"
@@ -24,6 +29,7 @@ type AuthController struct {
 	serviceManager svc_interfaces.ServiceManager
 	ssoManager     sso_interfaces.SSOManager
 	cacheManager   cache_interfaces.CacheManager
+	emailManager   email_interfaces.EmailManager
 }
 
 func NewAuthController(logger log.Logger, serviceManager svc_interfaces.ServiceManager, cacheManager cache_interfaces.CacheManager) AuthController {
@@ -36,12 +42,88 @@ func NewAuthController(logger log.Logger, serviceManager svc_interfaces.ServiceM
 		},
 	)
 
+	emailManager, err := email.NewEmailManager()
+	if err != nil {
+		logger.Errorf("failed to create email manager: %s", err.Error())
+	}
+
 	return AuthController{
 		logger:         logger,
 		serviceManager: serviceManager,
 		ssoManager:     ssoManager,
 		cacheManager:   cacheManager,
+		emailManager:   emailManager,
 	}
+}
+
+func (ctlr *AuthController) CustomerLogin(response http.ResponseWriter, request *http.Request) {
+	context, cancel := context.WithTimeout(request.Context(), constants.DefaultTimeout)
+	defer cancel()
+
+	var loginRequest dto.LoginRequest
+	err := json.NewDecoder(request.Body).Decode(&loginRequest)
+	if err != nil {
+		utils.CreateResponse(&response, http.StatusBadRequest, errors.New("payload format is invalid"))
+		return
+	}
+	ctlr.logger.Debugf("login request received: %v", loginRequest)
+
+	customerService := ctlr.serviceManager.NewCustomerService()
+	customer, err := customerService.GetCustomerLogin(context, loginRequest.Email, loginRequest.PasswordHash)
+	if err != nil {
+		utils.CreateResponse(&response, http.StatusInternalServerError, err)
+		return
+	}
+
+	token, err := jwt.GenerateAuthToken(customer.ID, customer.Name, constants.RoleCustomer)
+	if err != nil {
+		ctlr.logger.Errorf("auth token error: %s", err.Error())
+		utils.CreateResponse(&response, http.StatusInternalServerError, err)
+		return
+	}
+
+	responseData := dto.LoginResponse{
+		Token: token,
+	}
+
+	utils.CreateResponse(&response, http.StatusOK, nil, responseData)
+}
+
+func (ctlr *AuthController) RecoverPassword(response http.ResponseWriter, request *http.Request) {
+	context, cancel := context.WithTimeout(request.Context(), constants.DefaultTimeout)
+	defer cancel()
+
+	var recoverRequest dto.RecoverPasswordRequest
+	err := json.NewDecoder(request.Body).Decode(&recoverRequest)
+	if err != nil {
+		utils.CreateResponse(&response, http.StatusBadRequest, errors.New("payload format is invalid"))
+		return
+	}
+	ctlr.logger.Debugf("recover request received: %v", recoverRequest)
+
+	customerService := ctlr.serviceManager.NewCustomerService()
+	customer, err := customerService.GetCustomerByEmail(context, recoverRequest.Email)
+	if err != nil {
+		utils.CreateResponse(&response, http.StatusInternalServerError, err)
+		return
+	}
+
+	responseData := dto.RecoverPasswordResponse{
+		Message: "If you have an account with us, you will receive an email with instructions to reset your password.",
+	}
+
+	if customer.ID == "" {
+		utils.CreateResponse(&response, http.StatusOK, nil, responseData)
+		return
+	}
+
+	err = ctlr.emailManager.SendRecoverPasswordEmail(context, customer)
+	if err != nil {
+		utils.CreateResponse(&response, http.StatusInternalServerError, err)
+		return
+	}
+
+	utils.CreateResponse(&response, http.StatusOK, nil, responseData)
 }
 
 func (ctlr *AuthController) SSORequest(response http.ResponseWriter, request *http.Request) {

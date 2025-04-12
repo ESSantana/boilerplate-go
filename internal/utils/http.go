@@ -36,6 +36,10 @@ func CreateResponse(response *http.ResponseWriter, statusCode int, responseErr e
 		statusCode = http.StatusNotFound
 	}
 
+	if _, ok := responseErr.(*errors.ForbiddenError); ok {
+		statusCode = http.StatusForbidden
+	}
+
 	(*response).WriteHeader(statusCode)
 	(*response).Write(bodyResponse)
 	(*response).Header().Set("Content-Type", "application/json")

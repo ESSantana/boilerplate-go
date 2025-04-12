@@ -36,8 +36,10 @@ func configAuth(router *chi.Mux, logger log.Logger, serviceManager svc_interface
 	controller := controllers.NewAuthController(logger, serviceManager, cacheManager)
 
 	router.Route("/auth", func(r chi.Router) {
-		r.Get("/{provider}", controller.SSORequest)
-		r.HandleFunc("/callback/{provider}", controller.SSOCallback)
+		r.Post("/customer", controller.CustomerLogin)
+		r.Post("/customer/recover-password", controller.RecoverPassword)
+		// r.Get("/{provider}", controller.SSORequest)
+		// r.HandleFunc("/callback/{provider}", controller.SSOCallback)
 	})
 }
 

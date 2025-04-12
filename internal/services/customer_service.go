@@ -25,6 +25,23 @@ func newCustomerService(logger log.Logger, repoManager repo_interfaces.Repositor
 	}
 }
 
+func (svc *customerService) GetCustomerLogin(ctx context.Context, email, passwordHash string) (customer models.Customer, err error) {
+	customerRepo := svc.repoManager.NewCustomerRepository()
+
+	if email == "" || passwordHash == "" {
+		return customer, errors.NewValidationError("email and password are required")
+	}
+
+	customer, err = customerRepo.GetCustomerLogin(ctx, email, passwordHash)
+	if err != nil {
+		if strings.Contains(err.Error(), "no rows in result set") {
+			return customer, errors.NewForbiddenError("email or password is incorrect")
+		}
+		return customer, err
+	}
+	return customer, nil
+}
+
 func (svc *customerService) GetCustomerById(ctx context.Context, id string) (customer models.Customer, err error) {
 	customerRepo := svc.repoManager.NewCustomerRepository()
 	customer, err = customerRepo.GetCustomerById(ctx, id)
@@ -43,6 +60,18 @@ func (svc *customerService) GetCustomerByExternalId(ctx context.Context, externa
 		return customer, err
 	}
 	return customer, nil
+}
+
+func (svc *customerService) GetCustomerByEmail(ctx context.Context, email string) (customer models.Customer, err error) {
+	customerRepo := svc.repoManager.NewCustomerRepository()
+
+	customerPersisted, err := customerRepo.GetCustomerEmail(ctx, email)
+	if err != nil && !strings.Contains(err.Error(), "no rows in result set") {
+		svc.logger.Errorf("error at customerRepo.GetCustomerEmail: %s", err.Error())
+		return customer, err
+	}
+
+	return customerPersisted, nil
 }
 
 func (svc *customerService) GetAllCustomers(ctx context.Context) (customers []models.Customer, err error) {

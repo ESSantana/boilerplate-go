@@ -43,3 +43,15 @@ func NewOperationError(message string) error {
 func (e *OperationError) Error() string {
 	return e.message
 }
+
+type ForbiddenError struct {
+	message string
+}
+
+func NewForbiddenError(message string) error {
+	return &ForbiddenError{message: message}
+}
+
+func (e *ForbiddenError) Error() string {
+	return e.message
+}

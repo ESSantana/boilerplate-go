@@ -3,8 +3,11 @@ package email
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 
+	"github.com/application-ellas/ella-backend/internal/domain/models"
+	"github.com/application-ellas/ella-backend/packages/email/domain"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sesv2"
@@ -34,37 +37,48 @@ func NewEmailManager() (*EmailManager, error) {
 	return &EmailManager{ses: ses}, nil
 }
 
-type sendemail struct {
-	SenderEmail string
-	ReplyTo     string
-	Destination string
-	ConfigSet   string
-	EmailTags   []types.MessageTag
-	Subject     string
-	Body        string
+func (em *EmailManager) SendRecoverPasswordEmail(ctx context.Context, customer models.Customer) (err error) {
+	if os.Getenv("ENV") == "local" {
+		fmt.Println("Mock sending email to:", customer.Email)
+		return nil
+	}
+
+	sendRequest := domain.SendEmailRequest{
+		Destination: customer.Email,
+	}
+
+	messageID, err := em.sendEmail(ctx, sendRequest)
+	if err != nil {
+		return err
+	}
+
+	// TODO: save messageID to database or cache for tracking purposes
+	fmt.Println("Message ID:", messageID)
+
+	return nil
 }
 
-func (em *EmailManager) SendEmail(ctx context.Context, sendemail sendemail) (messageID string, err error) {
+func (em *EmailManager) sendEmail(ctx context.Context, request domain.SendEmailRequest) (messageID string, err error) {
 	sesInput := sesv2.SendEmailInput{
-		FromEmailAddress: aws.String(sendemail.SenderEmail),
-		ReplyToAddresses: []string{sendemail.ReplyTo},
+		FromEmailAddress: aws.String(request.SenderEmail),
+		ReplyToAddresses: []string{request.ReplyTo},
 		Destination: &types.Destination{
-			ToAddresses: []string{sendemail.Destination},
+			ToAddresses: []string{request.Destination},
 		},
-		ConfigurationSetName: aws.String(sendemail.ConfigSet),
+		ConfigurationSetName: aws.String(request.ConfigSet),
 		ListManagementOptions: &types.ListManagementOptions{
 			ContactListName: aws.String("main"),
 			TopicName:       aws.String("main"),
 		},
-		EmailTags: sendemail.EmailTags,
+		EmailTags: request.EmailTags,
 		Content: &types.EmailContent{
 			Simple: &types.Message{
 				Subject: &types.Content{
-					Data: aws.String(sendemail.Subject),
+					Data: aws.String(request.Subject),
 				},
 				Body: &types.Body{
 					Html: &types.Content{
-						Data: aws.String(sendemail.Body),
+						Data: aws.String(request.Body),
 					},
 				},
 			},

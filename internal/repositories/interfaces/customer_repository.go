@@ -7,6 +7,7 @@ import (
 )
 
 type CustomerRepository interface {
+	GetCustomerLogin(ctx context.Context, email string, passwordHash string) (customer models.Customer, err error)
 	GetCustomerById(ctx context.Context, id string) (user models.Customer, err error)
 	GetCustomerByExternalID(ctx context.Context, externalID string) (customer models.Customer, err error)
 	GetCustomerEmail(ctx context.Context, email string) (customer models.Customer, err error)

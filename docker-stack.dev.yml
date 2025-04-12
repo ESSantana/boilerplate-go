@@ -37,6 +37,7 @@ services:
   ellaapi:
     image: ella-backend:local
     environment:
+      - ENV=local
       - DB_USER=ella-api
       - DB_PASS=password
       - REDIS_USER=ella-api
