@@ -5,9 +5,9 @@ services:
             - "--providers.docker"
             - "--providers.docker.exposedbydefault=false"
             - "--entryPoints.websecure.address=:443"
-            - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
-            - "--certificatesresolvers.myresolver.acme.email=contato@emershow.com"
-            - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+            - "--certificatesresolvers.emershow-resolver.acme.tlschallenge=true"
+            - "--certificatesresolvers.emershow-resolver.acme.email=contato@emershow.com"
+            - "--certificatesresolvers.emershow-resolver.acme.storage=/letsencrypt/acme.json"
             - "--entryPoints.web.address=:80"
             - "--entryPoints.websecure.http.redirections.entryPoint.to=websecure"
             - "--entryPoints.websecure.http.redirections.entryPoint.scheme=https"
@@ -66,14 +66,14 @@ services:
             timeout: 5s
             retries: 20
 
-    ellaapi:
+    api:
         image: ghcr.io/application-ellas/ella-api:${GIT_COMMIT_HASH:-latest}
         labels:
             - "traefik.enable=true"
-            - "traefik.http.services.ellaapi.loadbalancer.server.port=8080"
-            - "traefik.http.routers.ellaapi.rule=Host(`api.emershow.com`)"
-            - "traefik.http.routers.ellaapi.entrypoints=websecure"
-            - "traefik.http.routers.ellaapi.tls.certresolver=myresolver"
+            - "traefik.http.services.api.loadbalancer.server.port=8080"
+            - "traefik.http.routers.api.rule=Host(`api.emershow.com`)"
+            - "traefik.http.routers.api.entrypoints=websecure"
+            - "traefik.http.routers.api.tls.certresolver=emershow-resolver"
         secrets:
             - api_mysql_user
             - api_mysql_password
