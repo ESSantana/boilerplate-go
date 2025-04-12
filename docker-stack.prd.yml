@@ -22,7 +22,7 @@ services:
         target: 443
     volumes:
       - letsencrypt:/letsencrypt
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
       - public
 
@@ -104,6 +104,8 @@ services:
         order: start-first
       mode: replicated
       replicas: 2
+    ports:
+      - 8080:8080
     networks:
       - public
       - db-network
