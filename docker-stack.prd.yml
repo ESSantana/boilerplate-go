@@ -96,8 +96,6 @@ services:
         deploy:
             update_config:
                 order: start-first
-            mode: replicated
-            replicas: 2
         expose:
             - 8080
         networks:
