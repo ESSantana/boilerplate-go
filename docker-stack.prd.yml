@@ -2,11 +2,11 @@ services:
     traefik:
         image: traefik:v3.3
         command:
-            - "--providers.docker"
-            - "--providers.docker.swarmMode=true"
-            - "--providers.docker.exposedbydefault=false"
-            - "--providers.docker.endpoint=unix:///var/run/docker.sock"
-            - "--providers.docker.network=public"
+            # - "--providers.docker"
+            - "--providers.swarm.endpoint=tcp://127.0.0.1:2377"
+            - "--providers.swarm.exposedByDefault=false"
+            - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
+            - "--providers.swarm.network=public"
             - "--entryPoints.websecure.address=:443"
             - "--certificatesresolvers.emershow-resolver.acme.tlschallenge=true"
             - "--certificatesresolvers.emershow-resolver.acme.email=contato@emershow.com"
