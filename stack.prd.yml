@@ -14,7 +14,7 @@ services:
             - "--entryPoints.web.http.redirections.entryPoint.permanent=true"
             - "--certificatesresolvers.lets-encrypt.acme.tlschallenge=true"
             - "--certificatesresolvers.lets-encrypt.acme.email=contato@emershow.com"
-            - "--certificatesresolvers.lets-encrypt.acme.storage=/traefik/letsencrypt/acme.json"
+            - "--certificatesresolvers.lets-encrypt.acme.storage=/letsencrypt/acme.json"
             - "--log.filepath=/traefik/logs/traefik.log"
             - "--log.format=json"
             - "--log.level=WARN"
@@ -28,6 +28,7 @@ services:
             - /etc/localtime:/etc/localtime
             - "/var/run/docker.sock:/var/run/docker.sock:ro"
             - traefik:/traefik:rw
+            - traefik/letsencrypt:/letsencrypt
         networks:
             - proxy
         logging:
