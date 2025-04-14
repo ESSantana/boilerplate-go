@@ -1,25 +1,20 @@
 package utils
 
 import (
+	"fmt"
 	"os"
 	"strings"
 )
 
 func RetrieveSecretValue(key string) string {
-	secretPath := os.Getenv(key)
-	if secretPath == "" {
-		return ""
+	if strings.HasSuffix(key, "_FILE") {
+		secretPath := os.Getenv(key)
+		data, err := os.ReadFile(secretPath)
+		if err != nil {
+			fmt.Println("error reading secret file: ", err.Error())
+			return ""
+		}
+		return string(data)
 	}
-
-	if !strings.Contains(key, "/") {
-		// is not a secret path, return the value directly
-		return secretPath
-	}
-
-	data, err := os.ReadFile(secretPath)
-	if err != nil {
-		return ""
-	}
-
-	return string(data)
+	return os.Getenv(key)
 }

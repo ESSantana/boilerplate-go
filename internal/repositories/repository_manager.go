@@ -23,8 +23,8 @@ type Scanner interface {
 func NewRepositoryManager(ctx context.Context) interfaces.RepositoryManager {
 	timeLoc, _ := time.LoadLocation("America/Sao_Paulo")
 	cfg := mysql.Config{
-		User:                 utils.RetrieveSecretValue("DB_USER"),
-		Passwd:               utils.RetrieveSecretValue("DB_PASS"),
+		User:                 utils.RetrieveSecretValue("DB_USER_FILE"),
+		Passwd:               utils.RetrieveSecretValue("DB_PASS_FILE"),
 		Net:                  "tcp",
 		Addr:                 os.Getenv("DB_HOST"),
 		DBName:               os.Getenv("DB_NAME"),

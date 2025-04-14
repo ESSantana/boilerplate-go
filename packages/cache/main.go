@@ -18,8 +18,8 @@ func NewCacheManager() interfaces.CacheManager {
 
 	client := redis.NewClient(&redis.Options{
 		Addr:     os.Getenv("REDIS_HOST"),
-		Username: utils.RetrieveSecretValue("REDIS_USER"),
-		Password: utils.RetrieveSecretValue("REDIS_PASSWORD"),
+		Username: utils.RetrieveSecretValue("REDIS_USER_FILE"),
+		Password: utils.RetrieveSecretValue("REDIS_PASSWORD_FILE"),
 		DB:       0,
 	})
 

@@ -78,14 +78,14 @@ services:
             - mercado_pago_token
             - jwt_secret_token
         environment:
-            - DB_USER=/run/secrets/api_mysql_user
-            - DB_PASS=/run/secrets/api_mysql_password
-            - REDIS_USER=/run/secrets/api_redis_user
-            - REDIS_PASSWORD=/run/secrets/api_redis_password
-            - GOOGLE_CLIENT_ID=/run/secrets/google_client_id
-            - GOOGLE_CLIENT_SECRET=/run/secrets/google_client_secret
-            - MERCADO_PAGO_TOKEN=/run/secrets/mercado_pago_token
-            - JWT_SECRET_KEY=/run/secrets/jwt_secret_token
+            - DB_USER_FILE=/run/secrets/api_mysql_user
+            - DB_PASS_FILE=/run/secrets/api_mysql_password
+            - REDIS_USER_FILE=/run/secrets/api_redis_user
+            - REDIS_PASSWORD_FILE=/run/secrets/api_redis_password
+            - GOOGLE_CLIENT_ID_FILE=/run/secrets/google_client_id
+            - GOOGLE_CLIENT_SECRET_FILE=/run/secrets/google_client_secret
+            - MERCADO_PAGO_TOKEN_FILE=/run/secrets/mercado_pago_token
+            - JWT_SECRET_KEY_FILE=/run/secrets/jwt_secret_token
             - GOOGLE_REDIRECT_URL=https://api.emershow.com/auth/callback/google
             - DB_HOST=db:3306
             - DB_NAME=ella-db
