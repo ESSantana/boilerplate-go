@@ -3,7 +3,10 @@ services:
         image: traefik:v3.3
         command:
             - "--providers.docker"
+            - "--providers.docker.swarmMode=true"
             - "--providers.docker.exposedbydefault=false"
+            - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+            - "--providers.docker.network=public"
             - "--entryPoints.websecure.address=:443"
             - "--certificatesresolvers.emershow-resolver.acme.tlschallenge=true"
             - "--certificatesresolvers.emershow-resolver.acme.email=contato@emershow.com"
