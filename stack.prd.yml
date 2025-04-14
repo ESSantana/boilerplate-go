@@ -102,10 +102,11 @@ services:
         image: ghcr.io/application-ellas/ella-api:${GIT_COMMIT_HASH:-latest}
         labels:
             - "traefik.enable=true"
-            - "traefik.http.services.api.loadbalancer.server.port=8080"
             - "traefik.http.routers.api.rule=Host(`api.emershow.com`)"
-            - "traefik.http.routers.api.entrypoints=websecure"
+            - "traefik.http.routers.api.tls=true"
             - "traefik.http.routers.api.tls.certresolver=lets-encrypt"
+            - "traefik.http.services.api.loadbalancer.server.port=8080"
+            - "traefik.docker.network=proxy"
         secrets:
             - api_mysql_user
             - api_mysql_password
