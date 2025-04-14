@@ -40,9 +40,9 @@ services:
         image: portainer/portainer-ce:lts
         labels:
             - "traefik.enable=true"
-            - "traefik.http.routers.portainer.rule=Host(`portainer.emershow.com`)"
-            - "traefik.http.routers.portainer.tls=true"
-            - "traefik.http.routers.portainer.tls.certresolver=lets-encrypt"
+            - "traefik.http.routers.main.rule=Host(`portainer.emershow.com`)"
+            - "traefik.http.routers.main.tls=true"
+            - "traefik.http.routers.main.tls.certresolver=lets-encrypt"
             - "traefik.http.services.portainer.loadbalancer.server.port=9000"
             - "traefik.docker.network=ella-backend_proxy"
         ports:
@@ -103,9 +103,9 @@ services:
         image: ghcr.io/application-ellas/ella-api:${GIT_COMMIT_HASH:-latest}
         labels:
             - "traefik.enable=true"
-            - "traefik.http.routers.api.rule=Host(`api.emershow.com`)"
-            - "traefik.http.routers.api.tls=true"
-            - "traefik.http.routers.api.tls.certresolver=lets-encrypt"
+            - "traefik.http.routers.main.rule=Host(`api.emershow.com`)"
+            - "traefik.http.routers.main.tls=true"
+            - "traefik.http.routers.main.tls.certresolver=lets-encrypt"
             - "traefik.http.services.api.loadbalancer.server.port=8080"
             - "traefik.docker.network=ella-backend_proxy"
         secrets:
