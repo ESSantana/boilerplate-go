@@ -147,11 +147,8 @@ services:
 
 networks:
     cache-network:
-        driver: overlay
     db-network:
-        driver: overlay
     proxy:
-        driver: overlay
 
 volumes:
     traefik:
