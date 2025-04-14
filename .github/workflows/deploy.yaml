@@ -63,7 +63,7 @@ jobs:
         uses: cssnr/stack-deploy-action@v1
         with:
           name: ella-backend
-          file: docker-stack.prd.yml
+          file: stack.prd.yml
           host: emershow.com
           user: github-actions-deploy
           ssh_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}

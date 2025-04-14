@@ -3,25 +3,60 @@ services:
         image: traefik:v3.3
         command:
             - "--providers.docker"
-            - "--providers.swarm.endpoint=tcp://127.0.0.1:2377"
-            - "--providers.swarm.exposedByDefault=false"
-            - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
-            - "--providers.swarm.network=public"
+            - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+            - "--providers.docker.watch=true"
+            - "--providers.docker.exposedByDefault=false"
+            - "--providers.docker.network=proxy"
             - "--entryPoints.websecure.address=:443"
-            - "--certificatesresolvers.emershow-resolver.acme.tlschallenge=true"
-            - "--certificatesresolvers.emershow-resolver.acme.email=contato@emershow.com"
-            - "--certificatesresolvers.emershow-resolver.acme.storage=/letsencrypt/acme.json"
             - "--entryPoints.web.address=:80"
-            - "--entryPoints.websecure.http.redirections.entryPoint.to=websecure"
-            - "--entryPoints.websecure.http.redirections.entryPoint.scheme=https"
+            - "--entryPoints.web.http.redirections.entryPoint.to=websecure"
+            - "--entryPoints.web.http.redirections.entryPoint.scheme=https"
+            - "--entryPoints.web.http.redirections.entryPoint.permanent=true"
+            - "--certificatesresolvers.lets-encrypt.acme.tlschallenge=true"
+            - "--certificatesresolvers.lets-encrypt.acme.email=contato@emershow.com"
+            - "--certificatesresolvers.lets-encrypt.acme.storage=/traefik/letsencrypt/acme.json"
+            - "--log.filepath=/traefik/logs/traefik.log"
+            - "--log.format=json"
+            - "--log.level=WARN"
+            - "--accessLog.filepath=/traefik/logs/access.log"
+            - "--accessLog.format=json"
+            - "--accessLog.filters.minduration=100ms"
         ports:
             - 80:80
             - 443:443
         volumes:
-            - letsencrypt:/letsencrypt
+            - /etc/localtime:/etc/localtime
             - "/var/run/docker.sock:/var/run/docker.sock:ro"
+            - traefik:/traefik
         networks:
-            - public
+            - proxy
+        logging:
+            options:
+                max-size: "1m"
+                max-file: "1"
+
+    portainer:
+        image: portainer/portainer-ce:lts
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.portainer.rule=Host(`portainer.emershow.com`)"
+            - "traefik.http.routers.portainer.tls=true"
+            - "traefik.http.routers.portainer.tls.certresolver=lets-encrypt"
+            - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+            - "traefik.docker.network=proxy"
+        ports:
+            - "8000:8000"
+            - "9000:9000"
+            - "9443:9443"
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - portainer:/data
+        networks:
+            - proxy
+        logging:
+            options:
+                max-size: "1m"
+                max-file: "1"
 
     db:
         image: mysql:9.2.0
@@ -70,7 +105,7 @@ services:
             - "traefik.http.services.api.loadbalancer.server.port=8080"
             - "traefik.http.routers.api.rule=Host(`api.emershow.com`)"
             - "traefik.http.routers.api.entrypoints=websecure"
-            - "traefik.http.routers.api.tls.certresolver=emershow-resolver"
+            - "traefik.http.routers.api.tls.certresolver=lets-encrypt"
         secrets:
             - api_mysql_user
             - api_mysql_password
@@ -102,7 +137,7 @@ services:
         expose:
             - 8080
         networks:
-            - public
+            - proxy
             - db-network
             - cache-network
         depends_on:
@@ -114,11 +149,12 @@ networks:
         driver: overlay
     db-network:
         driver: overlay
-    public:
+    proxy:
         driver: overlay
 
 volumes:
-    letsencrypt:
+    traefik:
+    portainer:
     db-data:
     cache-data:
 
