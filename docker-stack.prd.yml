@@ -2,7 +2,7 @@ services:
     traefik:
         image: traefik:v3.3
         command:
-            # - "--providers.docker"
+            - "--providers.docker"
             - "--providers.swarm.endpoint=tcp://127.0.0.1:2377"
             - "--providers.swarm.exposedByDefault=false"
             - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
