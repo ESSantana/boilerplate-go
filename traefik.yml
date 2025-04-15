@@ -23,7 +23,7 @@ certificatesResolvers:
             tlsChallenge: {}
             email: "contato@emershow.com"
             storage: "/letsencrypt/acme.json"
-
+            
 log:
     filePath: /traefik/logs/traefik.log
     format: json
