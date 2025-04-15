@@ -9,19 +9,28 @@ import (
 	"github.com/application-ellas/ella-backend/internal/domain/models"
 	repo_interfaces "github.com/application-ellas/ella-backend/internal/repositories/interfaces"
 	"github.com/application-ellas/ella-backend/internal/services/interfaces"
+	"github.com/application-ellas/ella-backend/internal/utils"
 	"github.com/application-ellas/ella-backend/packages/log"
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 )
 
 type customerService struct {
 	logger      log.Logger
 	repoManager repo_interfaces.RepositoryManager
+	validate    *validator.Validate
 }
 
 func newCustomerService(logger log.Logger, repoManager repo_interfaces.RepositoryManager) interfaces.CustomerService {
+	validate := validator.New(validator.WithRequiredStructEnabled())
+
+	validate.RegisterValidation("required_if_match_format", utils.ValidateRequiredIfFieldMatchFormat)
+	validate.RegisterValidation("required_if_not_match_format", utils.ValidateRequiredIfFieldNotMatchFormat)
+
 	return &customerService{
 		logger:      logger,
 		repoManager: repoManager,
+		validate:    validate,
 	}
 }
 
@@ -86,14 +95,14 @@ func (svc *customerService) GetAllCustomers(ctx context.Context) (customers []mo
 }
 
 func (svc *customerService) CreateCustomer(ctx context.Context, customer models.Customer) (customerCreated models.Customer, err error) {
+	if errValidation := svc.validate.Struct(customer); errValidation != nil {
+		return customerCreated, utils.ParseValidatorErrorMessage(errValidation)
+	}
+
 	customerRepo := svc.repoManager.NewCustomerRepository()
 
 	customer.ID = uuid.New().String()
 	customer.ProviderOrigin = constants.ProviderOriginInternal
-
-	if errValidation := customer.Validate(); errValidation != nil {
-		return customerCreated, errors.NewValidationError(errValidation.Error())
-	}
 
 	customerPersisted, err := customerRepo.GetCustomerEmail(ctx, customer.Email)
 	if err != nil && !strings.Contains(err.Error(), "no rows in result set") {
@@ -115,6 +124,10 @@ func (svc *customerService) CreateCustomer(ctx context.Context, customer models.
 }
 
 func (svc *customerService) UpdateCustomer(ctx context.Context, customer models.Customer) error {
+	if errValidation := svc.validate.Struct(customer); errValidation != nil {
+		return utils.ParseValidatorErrorMessage(errValidation)
+	}
+
 	customerRepo := svc.repoManager.NewCustomerRepository()
 
 	_, err := customerRepo.GetCustomerById(ctx, customer.ID)
@@ -123,10 +136,6 @@ func (svc *customerService) UpdateCustomer(ctx context.Context, customer models.
 			return errors.NewValidationError("customer not found")
 		}
 		return err
-	}
-
-	if errValidation := customer.Validate(); errValidation != nil {
-		return errors.NewValidationError(errValidation.Error())
 	}
 
 	err = customerRepo.UpdateCustomer(ctx, customer)

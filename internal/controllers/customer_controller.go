@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io"
 
 	"net/http"
 
@@ -76,14 +75,8 @@ func (ctlr *CustomerController) Create(response http.ResponseWriter, request *ht
 	context, cancel := context.WithTimeout(request.Context(), constants.DefaultTimeout)
 	defer cancel()
 
-	body, err := io.ReadAll(request.Body)
-	if err != nil {
-		utils.CreateResponse(&response, http.StatusBadRequest, errors.New("payload format is invalid"))
-		return
-	}
-
 	var customer models.Customer
-	err = json.Unmarshal(body, &customer)
+	err := json.NewDecoder(request.Body).Decode(&customer)
 	if err != nil {
 		utils.CreateResponse(&response, http.StatusBadRequest, errors.New("payload format is invalid"))
 		return
@@ -115,19 +108,19 @@ func (ctlr *CustomerController) Update(response http.ResponseWriter, request *ht
 	context, cancel := context.WithTimeout(request.Context(), constants.DefaultTimeout)
 	defer cancel()
 
-	body, err := io.ReadAll(request.Body)
-	if err != nil {
-		utils.CreateResponse(&response, http.StatusBadRequest, errors.New("payload format is invalid"))
-		return
-	}
-
 	var customer models.Customer
-	err = json.Unmarshal(body, &customer)
+	err := json.NewDecoder(request.Body).Decode(&customer)
 	if err != nil {
 		utils.CreateResponse(&response, http.StatusBadRequest, errors.New("payload format is invalid"))
 		return
 	}
 	ctlr.logger.Debugf("customer received: %v", customer)
+
+    err = jwt.ValidateUserRequestIssuer(request, utils.CreateUserValidation(customer.ID))
+	if err != nil {
+		utils.CreateResponse(&response, http.StatusForbidden, err)
+		return
+	}
 
 	customerService := ctlr.serviceManager.NewCustomerService()
 	err = customerService.UpdateCustomer(context, customer)
@@ -142,19 +135,19 @@ func (ctlr *CustomerController) SoftDelete(response http.ResponseWriter, request
 	context, cancel := context.WithTimeout(request.Context(), constants.DefaultTimeout)
 	defer cancel()
 
-	body, err := io.ReadAll(request.Body)
-	if err != nil {
-		utils.CreateResponse(&response, http.StatusBadRequest, errors.New("payload format is invalid"))
-		return
-	}
-
 	var customer models.Customer
-	err = json.Unmarshal(body, &customer)
+	err := json.NewDecoder(request.Body).Decode(&customer)
 	if err != nil {
 		utils.CreateResponse(&response, http.StatusBadRequest, errors.New("payload format is invalid"))
 		return
 	}
 	ctlr.logger.Debugf("customer received: %v", customer)
+
+	err = jwt.ValidateUserRequestIssuer(request, utils.CreateUserValidation(customer.ID))
+	if err != nil {
+		utils.CreateResponse(&response, http.StatusForbidden, err)
+		return
+	}
 
 	customerService := ctlr.serviceManager.NewCustomerService()
 	err = customerService.SoftDeleteCustomer(context, customer.ID)

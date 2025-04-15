@@ -16,10 +16,17 @@ type cacheManager struct {
 
 func NewCacheManager() interfaces.CacheManager {
 
+	redisUser := utils.RetrieveSecretValue("REDIS_USER_FILE")
+	redisPass := utils.RetrieveSecretValue("REDIS_PASSWORD_FILE")
+	if os.Getenv("ENV") == "development" {
+		redisUser = os.Getenv("REDIS_USER")
+		redisPass = os.Getenv("REDIS_PASSWORD")
+	}
+
 	client := redis.NewClient(&redis.Options{
 		Addr:     os.Getenv("REDIS_HOST"),
-		Username: utils.RetrieveSecretValue("REDIS_USER_FILE"),
-		Password: utils.RetrieveSecretValue("REDIS_PASSWORD_FILE"),
+		Username: redisUser,
+		Password: redisPass,
 		DB:       0,
 	})
 

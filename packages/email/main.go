@@ -38,7 +38,7 @@ func NewEmailManager() (*EmailManager, error) {
 }
 
 func (em *EmailManager) SendRecoverPasswordEmail(ctx context.Context, customer models.Customer) (err error) {
-	if os.Getenv("ENV") == "local" {
+	if os.Getenv("ENV") == "development" {
 		fmt.Println("Mock sending email to:", customer.Email)
 		return nil
 	}

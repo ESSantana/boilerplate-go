@@ -23,16 +23,14 @@ func AuthMiddleware(allowedRoles []string) func(next http.Handler) http.Handler 
 				return
 			}
 
-			jwt, customClaims, err := jwt.DecodeAuthToken(token)
+			userClaimData, err := jwt.DecodeAuthToken(token)
 			if err != nil {
 				response.WriteHeader(http.StatusUnauthorized)
 				return
 			}
 
-			if jwt.Valid {
-				if slices.Contains(allowedRoles, customClaims.Role) {
-					next.ServeHTTP(response, request)
-				}
+			if slices.Contains(allowedRoles, userClaimData.Role) {
+				next.ServeHTTP(response, request)
 			}
 
 			response.WriteHeader(http.StatusUnauthorized)

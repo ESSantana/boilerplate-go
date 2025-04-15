@@ -2,9 +2,12 @@ package utils
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
+	"github.com/application-ellas/ella-backend/internal/domain/constants"
 	"github.com/application-ellas/ella-backend/internal/domain/dto"
 	"github.com/application-ellas/ella-backend/internal/domain/errors"
 )
@@ -59,4 +62,21 @@ func ReadBody[T any](request *http.Request, response http.ResponseWriter) (outpu
 		return bodyRequest
 	}
 	return bodyRequest
+}
+
+func CreateUserValidation(expectedID string) func(params ...string) bool {
+	return func(params ...string) bool {
+		if len(params) < 2 {
+            fmt.Println("params length is less than 2")
+			return false
+		}
+		role := strings.TrimSpace(params[0])
+		userID := strings.TrimSpace(params[1])
+
+		if role == constants.RoleAdmin {
+			return true
+		}
+
+		return userID == expectedID
+	}
 }
