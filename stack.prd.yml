@@ -44,10 +44,8 @@ services:
             - "traefik.http.routers.portainer.tls=true"
             - "traefik.http.services.portainer.loadbalancer.server.port=9000"
             - "traefik.docker.network=ella-backend_proxy"
-        ports:
-            - "8000:8000"
-            - "9000:9000"
-            - "9443:9443"
+        expose:
+            - 9000
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
             - portainer:/data
@@ -135,8 +133,8 @@ services:
         deploy:
             update_config:
                 order: start-first
-        ports:
-            - 8080:8080
+        expose:
+            - 8080
         networks:
             - proxy
             - db-network
