@@ -1,7 +1,7 @@
 http:
     routers:
         main:
-            rule: Host(`portainer.emershow.com`) || Host(`api.emershow.com`)
+            rule: Host(`emershow.com`)
             tls:
                 certResolver: lets-encrypt
             service: main
