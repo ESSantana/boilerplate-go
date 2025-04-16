@@ -39,6 +39,12 @@ func (ctlr *CustomerController) GetCustomerById(response http.ResponseWriter, re
 	customerId := chi.URLParam(request, "id")
 	ctlr.logger.Debugf("customer_id: %v", customerId)
 
+    err := jwt.ValidateUserRequestIssuer(request, utils.CreateUserValidation(customerId))
+	if err != nil {
+		utils.CreateResponse(&response, http.StatusForbidden, err)
+		return
+	}
+
 	customerService := ctlr.serviceManager.NewCustomerService()
 	customer, err := customerService.GetCustomerById(context, customerId)
 	if err != nil {

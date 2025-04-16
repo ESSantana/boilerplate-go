@@ -34,7 +34,20 @@ func ParseValidatorErrorMessage(err error) error {
 }
 
 func ValidateRequiredIfFieldNotMatchFormat(fl validator.FieldLevel) bool {
-	return !ValidateRequiredIfFieldMatchFormat(fl)
+	params := strings.Split(fl.Param(), " ")
+	field, format := params[0], params[1]
+
+	switch format {
+	case "uuid":
+		value := fl.Parent().FieldByName(field).String()
+		uuid, err := uuid.Parse(value)
+		if uuid.String() != "" && err == nil {
+			return true
+		}
+		return checkIfTypeIsEmpty(fl.Field())
+	default:
+		return true
+	}
 }
 
 func ValidateRequiredIfFieldMatchFormat(fl validator.FieldLevel) bool {
@@ -44,8 +57,8 @@ func ValidateRequiredIfFieldMatchFormat(fl validator.FieldLevel) bool {
 	switch format {
 	case "uuid":
 		value := fl.Parent().FieldByName(field).String()
-		_, err := uuid.Parse(value)
-		if err != nil {
+		uuid, err := uuid.Parse(value)
+		if uuid.String() == "" || err != nil {
 			return true
 		}
 		return checkIfTypeIsEmpty(fl.Field())

@@ -67,13 +67,13 @@ func ReadBody[T any](request *http.Request, response http.ResponseWriter) (outpu
 func CreateUserValidation(expectedID string) func(params ...string) bool {
 	return func(params ...string) bool {
 		if len(params) < 2 {
-            fmt.Println("params length is less than 2")
+			fmt.Println("params length is less than 2")
 			return false
 		}
 		role := strings.TrimSpace(params[0])
 		userID := strings.TrimSpace(params[1])
 
-		if role == constants.RoleAdmin {
+		if role == constants.RoleAdmin || role == constants.RoleManager {
 			return true
 		}
 
