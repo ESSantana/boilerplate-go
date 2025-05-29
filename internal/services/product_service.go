@@ -3,11 +3,11 @@ package services
 import (
 	"context"
 
-	"github.com/application-ellas/ella-backend/internal/domain/models"
-	repo_interfaces "github.com/application-ellas/ella-backend/internal/repositories/interfaces"
-	"github.com/application-ellas/ella-backend/internal/services/interfaces"
+	"github.com/ESSantana/boilerplate-backend/internal/domain/models"
+	repo_interfaces "github.com/ESSantana/boilerplate-backend/internal/repositories/interfaces"
+	"github.com/ESSantana/boilerplate-backend/internal/services/interfaces"
 
-	"github.com/application-ellas/ella-backend/packages/log"
+	"github.com/ESSantana/boilerplate-backend/packages/log"
 )
 
 type productService struct {

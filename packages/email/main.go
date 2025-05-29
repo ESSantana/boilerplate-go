@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/application-ellas/ella-backend/internal/domain/models"
-	"github.com/application-ellas/ella-backend/packages/email/domain"
+	"github.com/ESSantana/boilerplate-backend/internal/domain/models"
+	"github.com/ESSantana/boilerplate-backend/packages/email/domain"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sesv2"

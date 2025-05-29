@@ -3,7 +3,7 @@ package interfaces
 import (
 	"net/http"
 
-	"github.com/application-ellas/ella-backend/internal/domain/dto"
+	"github.com/ESSantana/boilerplate-backend/internal/domain/dto"
 )
 
 type SSOProvider interface {

@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/application-ellas/ella-backend/internal/domain/models"
-	"github.com/application-ellas/ella-backend/internal/repositories/interfaces"
+	"github.com/ESSantana/boilerplate-backend/internal/domain/models"
+	"github.com/ESSantana/boilerplate-backend/internal/repositories/interfaces"
 )
 
 type customerRepository struct {

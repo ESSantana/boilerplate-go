@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"strings"
 
-	custom_errors "github.com/application-ellas/ella-backend/internal/domain/errors"
+	custom_errors "github.com/ESSantana/boilerplate-backend/internal/domain/errors"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 )

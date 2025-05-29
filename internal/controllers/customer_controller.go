@@ -7,14 +7,14 @@ import (
 
 	"net/http"
 
-	"github.com/application-ellas/ella-backend/internal/domain/constants"
-	"github.com/application-ellas/ella-backend/internal/domain/dto"
-	"github.com/application-ellas/ella-backend/internal/domain/models"
-	svc_interfaces "github.com/application-ellas/ella-backend/internal/services/interfaces"
-	"github.com/application-ellas/ella-backend/internal/utils"
-	cache_interfaces "github.com/application-ellas/ella-backend/packages/cache/interfaces"
-	"github.com/application-ellas/ella-backend/packages/jwt"
-	"github.com/application-ellas/ella-backend/packages/log"
+	"github.com/ESSantana/boilerplate-backend/internal/domain/constants"
+	"github.com/ESSantana/boilerplate-backend/internal/domain/dto"
+	"github.com/ESSantana/boilerplate-backend/internal/domain/models"
+	svc_interfaces "github.com/ESSantana/boilerplate-backend/internal/services/interfaces"
+	"github.com/ESSantana/boilerplate-backend/internal/utils"
+	cache_interfaces "github.com/ESSantana/boilerplate-backend/packages/cache/interfaces"
+	"github.com/ESSantana/boilerplate-backend/packages/jwt"
+	"github.com/ESSantana/boilerplate-backend/packages/log"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -39,7 +39,7 @@ func (ctlr *CustomerController) GetCustomerById(response http.ResponseWriter, re
 	customerId := chi.URLParam(request, "id")
 	ctlr.logger.Debugf("customer_id: %v", customerId)
 
-    err := jwt.ValidateUserRequestIssuer(request, utils.CreateUserValidation(customerId))
+	err := jwt.ValidateUserRequestIssuer(request, utils.CreateUserValidation(customerId))
 	if err != nil {
 		utils.CreateResponse(&response, http.StatusForbidden, err)
 		return
@@ -122,7 +122,7 @@ func (ctlr *CustomerController) Update(response http.ResponseWriter, request *ht
 	}
 	ctlr.logger.Debugf("customer received: %v", customer)
 
-    err = jwt.ValidateUserRequestIssuer(request, utils.CreateUserValidation(customer.ID))
+	err = jwt.ValidateUserRequestIssuer(request, utils.CreateUserValidation(customer.ID))
 	if err != nil {
 		utils.CreateResponse(&response, http.StatusForbidden, err)
 		return

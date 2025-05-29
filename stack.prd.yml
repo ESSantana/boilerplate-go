@@ -43,7 +43,7 @@ services:
             - "traefik.http.routers.portainer.rule=Host(`portainer.emershow.com`)"
             - "traefik.http.routers.portainer.tls=true"
             - "traefik.http.services.portainer.loadbalancer.server.port=9000"
-            - "traefik.docker.network=ella-backend_proxy"
+            - "traefik.docker.network=boilerplate-backend_proxy"
         expose:
             - 9000
         volumes:
@@ -66,7 +66,7 @@ services:
             - MYSQL_USER_FILE=/run/secrets/mysql_user
             - MYSQL_PASSWORD_FILE=/run/secrets/mysql_password
             - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/mysql_root_password
-            - MYSQL_DATABASE=ella-db
+            - MYSQL_DATABASE=boilerplate-db
         ports:
             - 3306:3306
         volumes:
@@ -97,14 +97,14 @@ services:
             retries: 20
 
     api:
-        image: ghcr.io/application-ellas/ella-api:${GIT_COMMIT_HASH:-latest}
+        image: ghcr.io/application-boilerplate/boilerplate-api:${GIT_COMMIT_HASH:-latest}
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.api.rule=Host(`api.emershow.com`)"
             - "traefik.http.routers.api.tls=true"
             - "traefik.http.routers.api.tls.certresolver=lets-encrypt"
             - "traefik.http.services.api.loadbalancer.server.port=8080"
-            - "traefik.docker.network=ella-backend_proxy"
+            - "traefik.docker.network=boilerplate-backend_proxy"
         secrets:
             - api_mysql_user
             - api_mysql_password
@@ -125,7 +125,7 @@ services:
             - JWT_SECRET_KEY_FILE=/run/secrets/jwt_secret_token
             - GOOGLE_REDIRECT_URL=https://api.emershow.com/auth/callback/google
             - DB_HOST=db:3306
-            - DB_NAME=ella-db
+            - DB_NAME=boilerplate-db
             - SERVER_PORT=8080
             - REDIS_HOST=cache:6379
             - FRONTEND_URL=http://localhost:3000/

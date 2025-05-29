@@ -5,7 +5,7 @@ services:
             - MYSQL_USER=admin
             - MYSQL_PASSWORD=admin
             - MYSQL_ROOT_PASSWORD=password
-            - MYSQL_DATABASE=ella-db
+            - MYSQL_DATABASE=boilerplate-db
         ports:
             - 3306:3306
         volumes:
@@ -35,12 +35,12 @@ services:
             retries: 20
 
     api:
-        image: ella-backend:local
+        image: boilerplate-backend:local
         environment:
             - ENV=development
-            - DB_USER=ella-api
+            - DB_USER=boilerplate-api
             - DB_PASS=password
-            - REDIS_USER=ella-api
+            - REDIS_USER=boilerplate-api
             - REDIS_PASSWORD=password
             - GOOGLE_CLIENT_ID=14302173819-3rfe2jq2ptfg53njtvmrgtmhlqom435a.apps.googleusercontent.com
             - GOOGLE_CLIENT_SECRET=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
@@ -48,7 +48,7 @@ services:
             - JWT_SECRET_KEY=mock-jwt-token
             - GOOGLE_REDIRECT_URL=https://localhost/auth/callback/google
             - DB_HOST=db:3306
-            - DB_NAME=ella-db
+            - DB_NAME=boilerplate-db
             - SERVER_PORT=8080
             - REDIS_HOST=cache:6379
             - FRONTEND_URL=http://localhost:3000/

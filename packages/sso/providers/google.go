@@ -6,9 +6,9 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/application-ellas/ella-backend/internal/domain/dto"
-	cache_interfaces "github.com/application-ellas/ella-backend/packages/cache/interfaces"
-	"github.com/application-ellas/ella-backend/packages/sso/interfaces"
+	"github.com/ESSantana/boilerplate-backend/internal/domain/dto"
+	cache_interfaces "github.com/ESSantana/boilerplate-backend/packages/cache/interfaces"
+	"github.com/ESSantana/boilerplate-backend/packages/sso/interfaces"
 	"github.com/google/uuid"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"

@@ -1,4 +1,4 @@
-USE `ella-db`;
+USE `boilerplate-db`;
 
 CREATE TABLE IF NOT EXISTS customer (
     id VARCHAR(36) NOT NULL PRIMARY KEY,

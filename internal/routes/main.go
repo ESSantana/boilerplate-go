@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/application-ellas/ella-backend/internal/controllers"
-	"github.com/application-ellas/ella-backend/internal/domain/constants"
-	"github.com/application-ellas/ella-backend/internal/routes/middlewares"
-	svc_interfaces "github.com/application-ellas/ella-backend/internal/services/interfaces"
-	cache_interfaces "github.com/application-ellas/ella-backend/packages/cache/interfaces"
-	"github.com/application-ellas/ella-backend/packages/log"
+	"github.com/ESSantana/boilerplate-backend/internal/controllers"
+	"github.com/ESSantana/boilerplate-backend/internal/domain/constants"
+	"github.com/ESSantana/boilerplate-backend/internal/routes/middlewares"
+	svc_interfaces "github.com/ESSantana/boilerplate-backend/internal/services/interfaces"
+	cache_interfaces "github.com/ESSantana/boilerplate-backend/packages/cache/interfaces"
+	"github.com/ESSantana/boilerplate-backend/packages/log"
 	"github.com/go-chi/chi/v5"
 )
 

@@ -7,7 +7,7 @@ COPY go.mod go.sum ./
 
 COPY . ./
 
-RUN CGO_ENABLE=1 GOOS=linux go build -o /ella-api ./cmd/api/main.go
+RUN CGO_ENABLE=1 GOOS=linux go build -o /boilerplate-api ./cmd/api/main.go
 
 # BUILD STATIC BINARY
 FROM busybox:1.37 as busybox
@@ -17,7 +17,7 @@ FROM gcr.io/distroless/base-debian12 AS release-stage
 
 WORKDIR /
 
-COPY --from=build-stage /ella-api /ella-api
+COPY --from=build-stage /boilerplate-api /boilerplate-api
 
 COPY --from=busybox /bin/sh /bin/sh
 COPY --from=busybox /bin/ls /bin/ls
@@ -30,4 +30,4 @@ COPY --from=busybox /bin/ps /bin/ps
 
 EXPOSE 8080
 
-ENTRYPOINT ["/ella-api"]
+ENTRYPOINT ["/boilerplate-api"]

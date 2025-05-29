@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/application-ellas/ella-backend/internal/repositories/interfaces"
-	"github.com/application-ellas/ella-backend/internal/utils"
+	"github.com/ESSantana/boilerplate-backend/internal/repositories/interfaces"
+	"github.com/ESSantana/boilerplate-backend/internal/utils"
 	"github.com/go-sql-driver/mysql"
 )
 
@@ -22,7 +22,7 @@ type Scanner interface {
 
 func NewRepositoryManager(ctx context.Context) interfaces.RepositoryManager {
 	timeLoc, _ := time.LoadLocation("America/Sao_Paulo")
-    
+
 	mysqlUser := utils.RetrieveSecretValue("DB_USER_FILE")
 	mysqlPass := utils.RetrieveSecretValue("DB_PASS_FILE")
 	if os.Getenv("ENV") == "development" {

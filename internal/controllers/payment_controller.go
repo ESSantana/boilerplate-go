@@ -6,13 +6,13 @@ import (
 
 	"net/http"
 
-	"github.com/application-ellas/ella-backend/internal/domain/constants"
-	"github.com/application-ellas/ella-backend/internal/domain/dto"
-	svc_interfaces "github.com/application-ellas/ella-backend/internal/services/interfaces"
-	"github.com/application-ellas/ella-backend/internal/utils"
-	"github.com/application-ellas/ella-backend/packages/log"
-	"github.com/application-ellas/ella-backend/packages/payment"
-	payment_interfaces "github.com/application-ellas/ella-backend/packages/payment/interfaces"
+	"github.com/ESSantana/boilerplate-backend/internal/domain/constants"
+	"github.com/ESSantana/boilerplate-backend/internal/domain/dto"
+	svc_interfaces "github.com/ESSantana/boilerplate-backend/internal/services/interfaces"
+	"github.com/ESSantana/boilerplate-backend/internal/utils"
+	"github.com/ESSantana/boilerplate-backend/packages/log"
+	"github.com/ESSantana/boilerplate-backend/packages/payment"
+	payment_interfaces "github.com/ESSantana/boilerplate-backend/packages/payment/interfaces"
 )
 
 type PaymentController struct {

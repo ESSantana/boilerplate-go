@@ -44,8 +44,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/application-ellas/ella-api:latest
-            ghcr.io/application-ellas/ella-api:${{ github.sha }}
+            ghcr.io/ESSantana/boilerplate-api:latest
+            ghcr.io/ESSantana/boilerplate-api:${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -62,7 +62,7 @@ jobs:
       - name: Docker Stack Deploy
         uses: cssnr/stack-deploy-action@v1
         with:
-          name: ella-backend
+          name: boilerplate-backend
           file: stack.prd.yml
           host: emershow.com
           user: github-actions-deploy
@@ -71,5 +71,5 @@ jobs:
           prune: true
           registry_auth: true
           registry_host: "ghcr.io"
-          registry_user: application-ellas
+          registry_user: application-boilerplates
           registry_pass: ${{ secrets.GHCR_TOKEN }}

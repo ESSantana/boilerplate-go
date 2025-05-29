@@ -1,10 +1,10 @@
 package services
 
 import (
-	repo_interfaces "github.com/application-ellas/ella-backend/internal/repositories/interfaces"
-	"github.com/application-ellas/ella-backend/internal/services/interfaces"
-	cache_interfaces "github.com/application-ellas/ella-backend/packages/cache/interfaces"
-	"github.com/application-ellas/ella-backend/packages/log"
+	repo_interfaces "github.com/ESSantana/boilerplate-backend/internal/repositories/interfaces"
+	"github.com/ESSantana/boilerplate-backend/internal/services/interfaces"
+	cache_interfaces "github.com/ESSantana/boilerplate-backend/packages/cache/interfaces"
+	"github.com/ESSantana/boilerplate-backend/packages/log"
 )
 
 type serviceManager struct {

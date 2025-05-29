@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/application-ellas/ella-backend/packages/jwt"
+	"github.com/ESSantana/boilerplate-backend/packages/jwt"
 )
 
 func AuthMiddleware(allowedRoles []string) func(next http.Handler) http.Handler {

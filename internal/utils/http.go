@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/application-ellas/ella-backend/internal/domain/constants"
-	"github.com/application-ellas/ella-backend/internal/domain/dto"
-	"github.com/application-ellas/ella-backend/internal/domain/errors"
+	"github.com/ESSantana/boilerplate-backend/internal/domain/constants"
+	"github.com/ESSantana/boilerplate-backend/internal/domain/dto"
+	"github.com/ESSantana/boilerplate-backend/internal/domain/errors"
 )
 
 func CreateResponse(response *http.ResponseWriter, statusCode int, responseErr error, data ...any) {

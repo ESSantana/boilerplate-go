@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/application-ellas/ella-backend/packages/jwt/domain"
+	"github.com/ESSantana/boilerplate-backend/packages/jwt/domain"
 	"github.com/golang-jwt/jwt/v5"
 )
 

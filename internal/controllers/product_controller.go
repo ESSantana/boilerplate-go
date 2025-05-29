@@ -7,12 +7,12 @@ import (
 
 	"net/http"
 
-	"github.com/application-ellas/ella-backend/internal/domain/constants"
-	"github.com/application-ellas/ella-backend/internal/domain/models"
-	svc_interfaces "github.com/application-ellas/ella-backend/internal/services/interfaces"
-	"github.com/application-ellas/ella-backend/internal/utils"
-	cache_interfaces "github.com/application-ellas/ella-backend/packages/cache/interfaces"
-	"github.com/application-ellas/ella-backend/packages/log"
+	"github.com/ESSantana/boilerplate-backend/internal/domain/constants"
+	"github.com/ESSantana/boilerplate-backend/internal/domain/models"
+	svc_interfaces "github.com/ESSantana/boilerplate-backend/internal/services/interfaces"
+	"github.com/ESSantana/boilerplate-backend/internal/utils"
+	cache_interfaces "github.com/ESSantana/boilerplate-backend/packages/cache/interfaces"
+	"github.com/ESSantana/boilerplate-backend/packages/log"
 )
 
 type ProductController struct {
