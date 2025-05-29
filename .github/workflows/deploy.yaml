@@ -59,17 +59,17 @@ jobs:
         run: |
           echo "GIT_COMMIT_HASH=${{ github.sha }}" >> ./envfile
 
-      - name: Docker Stack Deploy
-        uses: cssnr/stack-deploy-action@v1
-        with:
-          name: boilerplate-backend
-          file: stack.prd.yml
-          host: emershow.com
-          user: github-actions-deploy
-          ssh_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
-          env_file: ./envfile
-          prune: true
-          registry_auth: true
-          registry_host: "ghcr.io"
-          registry_user: application-boilerplates
-          registry_pass: ${{ secrets.GHCR_TOKEN }}
+      # - name: Docker Stack Deploy
+      #   uses: cssnr/stack-deploy-action@v1
+      #   with:
+      #     name: boilerplate-backend
+      #     file: stack.prd.yml
+      #     host: emershow.com
+      #     user: github-actions-deploy
+      #     ssh_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+      #     env_file: ./envfile
+      #     prune: true
+      #     registry_auth: true
+      #     registry_host: "ghcr.io"
+      #     registry_user: application-boilerplates
+      #     registry_pass: ${{ secrets.GHCR_TOKEN }}
