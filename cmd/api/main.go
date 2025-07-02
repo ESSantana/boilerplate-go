@@ -7,6 +7,7 @@ import (
 	"github.com/ESSantana/boilerplate-backend/internal/repositories"
 	repo_interfaces "github.com/ESSantana/boilerplate-backend/internal/repositories/interfaces"
 	"github.com/ESSantana/boilerplate-backend/internal/routes"
+	"github.com/ESSantana/boilerplate-backend/internal/routes/middlewares"
 	"github.com/ESSantana/boilerplate-backend/internal/services"
 	svc_interfaces "github.com/ESSantana/boilerplate-backend/internal/services/interfaces"
 	"github.com/ESSantana/boilerplate-backend/packages/cache"
@@ -35,7 +36,9 @@ func main() {
 
 func startServer() {
 	app = fiber.New()
+	middlewares.PrometheusInit()
 
+	app.Use(middlewares.TrackMetrics())
 	app.Use(mw_logger.New())
 	app.Use(mw_cors.New(mw_cors.Config{
 		AllowOrigins:     []string{"*"},

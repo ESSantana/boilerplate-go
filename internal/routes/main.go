@@ -14,6 +14,7 @@ import (
 )
 
 func ConfigRoutes(router *fiber.App, logger log.Logger, serviceManager svc_interfaces.ServiceManager, cacheManager cache_interfaces.CacheManager) {
+	router.Get("/metrics", middlewares.PrometheusMetricsHandler())
 	router.Get("/health-check", func(c fiber.Ctx) error {
 		dbHealthStatus, cacheHealthStatus := serviceManager.HealthCheck()
 		payload := map[string]any{
