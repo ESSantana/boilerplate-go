@@ -36,7 +36,7 @@ func PrometheusMetricsHandler() fiber.Handler {
 	return adaptor.HTTPHandler(promhttp.Handler())
 }
 
-func TrackMetrics() fiber.Handler {
+func TrackMetricsMiddleware() fiber.Handler {
 	return func(ctx fiber.Ctx) error {
 		path := ctx.Path()
 		method := ctx.Method()

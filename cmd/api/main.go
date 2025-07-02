@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"os"
+	"sync"
 
 	"github.com/ESSantana/boilerplate-backend/internal/repositories"
 	repo_interfaces "github.com/ESSantana/boilerplate-backend/internal/repositories/interfaces"
@@ -19,17 +20,21 @@ import (
 	"github.com/ESSantana/boilerplate-backend/packages/log"
 )
 
-var logger log.Logger
-var repoManager repo_interfaces.RepositoryManager
-var serviceManager svc_interfaces.ServiceManager
-var cacheManager cache_interfaces.CacheManager
-var app *fiber.App
+var (
+	logger         log.Logger
+	repoManager    repo_interfaces.RepositoryManager
+	serviceManager svc_interfaces.ServiceManager
+	cacheManager   cache_interfaces.CacheManager
+	app            *fiber.App
+)
+
 
 func main() {
 	logger = log.NewLogger(log.DEBUG)
-	singletonCache()
-	singletonRepository(context.Background())
-	singletonService(logger)
+
+	initCache()
+	initRepository(context.Background())
+	initService(logger)
 
 	startServer()
 }
@@ -38,7 +43,7 @@ func startServer() {
 	app = fiber.New()
 	middlewares.PrometheusInit()
 
-	app.Use(middlewares.TrackMetrics())
+	app.Use(middlewares.TrackMetricsMiddleware())
 	app.Use(mw_logger.New())
 	app.Use(mw_cors.New(mw_cors.Config{
 		AllowOrigins:     []string{"*"},
@@ -58,26 +63,26 @@ func startServer() {
 	}
 }
 
-func singletonRepository(ctx context.Context) {
-	logger.Info("Connecting to MySQL...")
-	if repoManager != nil {
-		return
-	}
-	repoManager = repositories.NewRepositoryManager(ctx)
+func initCache() {
+	c := sync.Once{}
+	c.Do(func() {
+		logger.Info("Connecting to Redis...")
+		cacheManager = cache.NewCacheManager()
+	})
 }
 
-func singletonService(logger log.Logger) {
-	logger.Info("Setup service manager...")
-	if serviceManager != nil {
-		return
-	}
-	serviceManager = services.NewServiceManager(logger, repoManager, cacheManager)
+func initRepository(ctx context.Context) {
+	r := sync.Once{}
+	r.Do(func() {
+		logger.Info("Connecting to MySQL...")
+		repoManager = repositories.NewRepositoryManager(ctx)
+	})
 }
 
-func singletonCache() {
-	logger.Info("Connecting to Redis...")
-	if cacheManager != nil {
-		return
-	}
-	cacheManager = cache.NewCacheManager()
+func initService(logger log.Logger) {
+	s := sync.Once{}
+	s.Do(func() {
+		logger.Info("Setup service manager...")
+		serviceManager = services.NewServiceManager(logger, repoManager, cacheManager)
+	})
 }

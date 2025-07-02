@@ -12,6 +12,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
+// CreateResponse creates a standardized HTTP response with the given status code, error, and data.
 func CreateResponse(ctx *fiber.Ctx, statusCode int, responseErr error, data ...any) {
 	var body = dto.HttpResponse{}
 	if responseErr != nil {
@@ -54,6 +55,7 @@ func ReadBody[T any](ctx *fiber.Ctx) (output T) {
 	return bodyRequest
 }
 
+// CreateUserValidation returns a function that validates user creation based on the role and user ID.
 func CreateUserValidation(expectedID string) func(params ...string) bool {
 	return func(params ...string) bool {
 		if len(params) < 2 {
