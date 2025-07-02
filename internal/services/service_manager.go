@@ -41,7 +41,3 @@ func (sm *serviceManager) HealthCheck() (dbHealthStatus, cacheHealthStatus bool)
 func (sm *serviceManager) NewCustomerService() interfaces.CustomerService {
 	return newCustomerService(sm.logger, sm.repoManager)
 }
-
-func (sm *serviceManager) NewProductService() interfaces.ProductService {
-	return newProductService(sm.logger, sm.repoManager)
-}

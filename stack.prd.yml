@@ -1,182 +1,182 @@
 services:
-    traefik:
-        image: traefik:v3.3
-        command:
-            - "--providers.docker"
-            - "--providers.docker.endpoint=unix:///var/run/docker.sock"
-            - "--providers.docker.watch=true"
-            - "--providers.docker.exposedByDefault=false"
-            - "--providers.docker.network=proxy"
-            - "--entryPoints.websecure.address=:443"
-            - "--entryPoints.web.address=:80"
-            - "--entryPoints.web.http.redirections.entryPoint.to=websecure"
-            - "--entryPoints.web.http.redirections.entryPoint.scheme=https"
-            - "--entryPoints.web.http.redirections.entryPoint.permanent=true"
-            - "--certificatesresolvers.lets-encrypt.acme.tlschallenge=true"
-            - "--certificatesresolvers.lets-encrypt.acme.email=contato@emershow.com"
-            - "--certificatesresolvers.lets-encrypt.acme.storage=/letsencrypt/acme.json"
-            - "--log.filepath=/traefik/logs/traefik.log"
-            - "--log.format=json"
-            - "--log.level=WARN"
-            - "--accessLog.filepath=/traefik/logs/access.log"
-            - "--accessLog.format=json"
-            - "--accessLog.filters.minduration=100ms"
-        ports:
-            - 80:80
-            - 443:443
-        volumes:
-            - /etc/localtime:/etc/localtime:ro
-            - /var/run/docker.sock:/var/run/docker.sock:ro
-            - traefik:/traefik:rw
-            - letsencrypt:/letsencrypt
-        networks:
-            - proxy
-        logging:
-            options:
-                max-size: "1m"
-                max-file: "1"
+  traefik:
+    image: traefik:v3.3
+    command:
+      - "--providers.docker"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--providers.docker.watch=true"
+      - "--providers.docker.exposedByDefault=false"
+      - "--providers.docker.network=proxy"
+      - "--entryPoints.websecure.address=:443"
+      - "--entryPoints.web.address=:80"
+      - "--entryPoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entryPoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entryPoints.web.http.redirections.entryPoint.permanent=true"
+      - "--certificatesresolvers.lets-encrypt.acme.tlschallenge=true"
+      - "--certificatesresolvers.lets-encrypt.acme.email=contato@emershow.com"
+      - "--certificatesresolvers.lets-encrypt.acme.storage=/letsencrypt/acme.json"
+      - "--log.filepath=/traefik/logs/traefik.log"
+      - "--log.format=json"
+      - "--log.level=WARN"
+      - "--accessLog.filepath=/traefik/logs/access.log"
+      - "--accessLog.format=json"
+      - "--accessLog.filters.minduration=100ms"
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik:/traefik:rw
+      - letsencrypt:/letsencrypt
+    networks:
+      - proxy
+    logging:
+      options:
+        max-size: "1m"
+        max-file: "1"
 
-    portainer:
-        image: portainer/portainer-ce:lts
-        labels:
-            - "traefik.enable=true"
-            - "traefik.http.routers.portainer.rule=Host(`portainer.emershow.com`)"
-            - "traefik.http.routers.portainer.tls=true"
-            - "traefik.http.services.portainer.loadbalancer.server.port=9000"
-            - "traefik.docker.network=boilerplate-backend_proxy"
-        expose:
-            - 9000
-        volumes:
-            - /var/run/docker.sock:/var/run/docker.sock
-            - portainer:/data
-        networks:
-            - proxy
-        logging:
-            options:
-                max-size: "1m"
-                max-file: "1"
+  portainer:
+    image: portainer/portainer-ce:lts
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.emershow.com`)"
+      - "traefik.http.routers.portainer.tls=true"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+      - "traefik.docker.network=boilerplate-backend_proxy"
+    expose:
+      - 9000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer:/data
+    networks:
+      - proxy
+    logging:
+      options:
+        max-size: "1m"
+        max-file: "1"
 
-    db:
-        image: mysql:9.2.0
-        secrets:
-            - mysql_user
-            - mysql_password
-            - mysql_root_password
-        environment:
-            - MYSQL_USER_FILE=/run/secrets/mysql_user
-            - MYSQL_PASSWORD_FILE=/run/secrets/mysql_password
-            - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/mysql_root_password
-            - MYSQL_DATABASE=boilerplate-db
-        ports:
-            - 3306:3306
-        volumes:
-            - db-data:/var/lib/mysql
-        networks:
-            - db-network
-        healthcheck:
-            test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-            start_period: 5s
-            timeout: 5s
-            retries: 20
+  db:
+    image: mysql:9.2.0
+    secrets:
+      - mysql_user
+      - mysql_password
+      - mysql_root_password
+    environment:
+      - MYSQL_USER_FILE=/run/secrets/mysql_user
+      - MYSQL_PASSWORD_FILE=/run/secrets/mysql_password
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/mysql_root_password
+      - MYSQL_DATABASE=boilerplate-db
+    ports:
+      - 3306:3306
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - db-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      start_period: 5s
+      timeout: 5s
+      retries: 20
 
-    cache:
-        image: redis:7.4.2
-        secrets:
-            - redis_password
-        command: bash -c 'redis-server --requirepass "$$(cat /run/secrets/redis_password)" --port 6379 --loglevel warning --save 60 1 --maxclients 1000 --maxmemory 1gb'
-        ports:
-            - 6379:6379
-        volumes:
-            - cache-data:/var/run
-        networks:
-            - cache-network
-        healthcheck:
-            test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
-            start_period: 5s
-            timeout: 5s
-            retries: 20
+  cache:
+    image: redis:7.4.2
+    secrets:
+      - redis_password
+    command: bash -c 'redis-server --requirepass "$$(cat /run/secrets/redis_password)" --port 6379 --loglevel warning --save 60 1 --maxclients 1000 --maxmemory 1gb'
+    ports:
+      - 6379:6379
+    volumes:
+      - cache-data:/var/run
+    networks:
+      - cache-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      start_period: 5s
+      timeout: 5s
+      retries: 20
 
-    api:
-        image: ghcr.io/application-boilerplate/boilerplate-api:${GIT_COMMIT_HASH:-latest}
-        labels:
-            - "traefik.enable=true"
-            - "traefik.http.routers.api.rule=Host(`api.emershow.com`)"
-            - "traefik.http.routers.api.tls=true"
-            - "traefik.http.routers.api.tls.certresolver=lets-encrypt"
-            - "traefik.http.services.api.loadbalancer.server.port=8080"
-            - "traefik.docker.network=boilerplate-backend_proxy"
-        secrets:
-            - api_mysql_user
-            - api_mysql_password
-            - api_redis_user
-            - api_redis_password
-            - google_client_id
-            - google_client_secret
-            - mercado_pago_token
-            - jwt_secret_token
-        environment:
-            - DB_USER_FILE=/run/secrets/api_mysql_user
-            - DB_PASS_FILE=/run/secrets/api_mysql_password
-            - REDIS_USER_FILE=/run/secrets/api_redis_user
-            - REDIS_PASSWORD_FILE=/run/secrets/api_redis_password
-            - GOOGLE_CLIENT_ID_FILE=/run/secrets/google_client_id
-            - GOOGLE_CLIENT_SECRET_FILE=/run/secrets/google_client_secret
-            - MERCADO_PAGO_TOKEN_FILE=/run/secrets/mercado_pago_token
-            - JWT_SECRET_KEY_FILE=/run/secrets/jwt_secret_token
-            - GOOGLE_REDIRECT_URL=https://api.emershow.com/auth/callback/google
-            - DB_HOST=db:3306
-            - DB_NAME=boilerplate-db
-            - SERVER_PORT=8080
-            - REDIS_HOST=cache:6379
-            - FRONTEND_URL=http://localhost:3000/
-            - AWS_DEFAULT_REGION=sa-east-1
-        deploy:
-            update_config:
-                order: start-first
-        expose:
-            - 8080
-        networks:
-            - proxy
-            - db-network
-            - cache-network
-        depends_on:
-            - db
-            - cache
+  api:
+    image: ghcr.io/application-boilerplate/boilerplate-api:${GIT_COMMIT_HASH:-latest}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`api.emershow.com`)"
+      - "traefik.http.routers.api.tls=true"
+      - "traefik.http.routers.api.tls.certresolver=lets-encrypt"
+      - "traefik.http.services.api.loadbalancer.server.port=8080"
+      - "traefik.docker.network=boilerplate-backend_proxy"
+    secrets:
+      - api_mysql_user
+      - api_mysql_password
+      - api_redis_user
+      - api_redis_password
+      - google_client_id
+      - google_client_secret
+      - mercado_pago_token
+      - jwt_secret_token
+    environment:
+      - DB_USER_FILE=/run/secrets/api_mysql_user
+      - DB_PASS_FILE=/run/secrets/api_mysql_password
+      - REDIS_USER_FILE=/run/secrets/api_redis_user
+      - REDIS_PASSWORD_FILE=/run/secrets/api_redis_password
+      - GOOGLE_CLIENT_ID_FILE=/run/secrets/google_client_id
+      - GOOGLE_CLIENT_SECRET_FILE=/run/secrets/google_client_secret
+      - MERCADO_PAGO_TOKEN_FILE=/run/secrets/mercado_pago_token
+      - JWT_SECRET_KEY_FILE=/run/secrets/jwt_secret_token
+      - GOOGLE_REDIRECT_URL=https://api.emershow.com/auth/callback/google
+      - DB_HOST=db:3306
+      - DB_NAME=boilerplate-db
+      - SERVER_PORT=8080
+      - REDIS_HOST=cache:6379
+      - FRONTEND_URL=http://localhost:3000/
+      - AWS_DEFAULT_REGION=sa-east-1
+    deploy:
+      update_config:
+        order: start-first
+    expose:
+      - 8080
+    networks:
+      - proxy
+      - db-network
+      - cache-network
+    depends_on:
+      - db
+      - cache
 
 networks:
-    cache-network:
-    db-network:
-    proxy:
+  cache-network:
+  db-network:
+  proxy:
 
 volumes:
-    traefik:
-    letsencrypt:
-    portainer:
-    db-data:
-    cache-data:
+  traefik:
+  letsencrypt:
+  portainer:
+  db-data:
+  cache-data:
 
 secrets:
-    mysql_user:
-        external: true
-    mysql_password:
-        external: true
-    mysql_root_password:
-        external: true
-    redis_password:
-        external: true
-    api_mysql_user:
-        external: true
-    api_mysql_password:
-        external: true
-    google_client_id:
-        external: true
-    google_client_secret:
-        external: true
-    mercado_pago_token:
-        external: true
-    jwt_secret_token:
-        external: true
-    api_redis_user:
-        external: true
-    api_redis_password:
-        external: true
+  mysql_user:
+    external: true
+  mysql_password:
+    external: true
+  mysql_root_password:
+    external: true
+  redis_password:
+    external: true
+  api_mysql_user:
+    external: true
+  api_mysql_password:
+    external: true
+  google_client_id:
+    external: true
+  google_client_secret:
+    external: true
+  mercado_pago_token:
+    external: true
+  jwt_secret_token:
+    external: true
+  api_redis_user:
+    external: true
+  api_redis_password:
+    external: true

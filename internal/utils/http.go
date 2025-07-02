@@ -3,32 +3,24 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"strings"
 
 	"github.com/ESSantana/boilerplate-backend/internal/domain/constants"
 	"github.com/ESSantana/boilerplate-backend/internal/domain/dto"
 	"github.com/ESSantana/boilerplate-backend/internal/domain/errors"
+	"github.com/gofiber/fiber/v3"
 )
 
-func CreateResponse(response *http.ResponseWriter, statusCode int, responseErr error, data ...any) {
-	var body dto.HttpResponse
+func CreateResponse(ctx *fiber.Ctx, statusCode int, responseErr error, data ...any) {
+	var body = dto.HttpResponse{}
 	if responseErr != nil {
-		body = dto.HttpResponse{
-			Error:   true,
-			Message: responseErr.Error(),
-		}
-	} else {
-		body = dto.HttpResponse{
-			Error: false,
-			Data:  data[0],
-		}
+		body.Error = true
+		body.Message = responseErr.Error()
 	}
 
-	bodyResponse, err := json.Marshal(body)
-	if err != nil {
-		panic(errors.New("something went wrong on http utils "))
+	if len(data) > 0 {
+		body.Data = data[0]
 	}
 
 	if _, ok := responseErr.(*errors.ValidationError); ok {
@@ -43,24 +35,22 @@ func CreateResponse(response *http.ResponseWriter, statusCode int, responseErr e
 		statusCode = http.StatusForbidden
 	}
 
-	(*response).WriteHeader(statusCode)
-	(*response).Write(bodyResponse)
-	(*response).Header().Set("Content-Type", "application/json")
+	c := *ctx
+
+	c.Status(statusCode)
+	c.Set("Content-Type", "application/json")
+	err := c.JSON(body)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+	}
+
+	ctx = &c
 }
 
-func ReadBody[T any](request *http.Request, response http.ResponseWriter) (output T) {
+// ReadBody reads the request body and unmarshals it into the provided type T.
+func ReadBody[T any](ctx *fiber.Ctx) (output T) {
 	var bodyRequest T
-	body, err := io.ReadAll(request.Body)
-	if err != nil {
-		CreateResponse(&response, http.StatusBadRequest, err)
-		return bodyRequest
-	}
-
-	err = json.Unmarshal(body, &bodyRequest)
-	if err != nil {
-		CreateResponse(&response, http.StatusBadRequest, err)
-		return bodyRequest
-	}
+	json.Unmarshal((*ctx).Body(), &bodyRequest)
 	return bodyRequest
 }
 

@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
 	"net/http"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/ESSantana/boilerplate-backend/packages/log"
 	"github.com/ESSantana/boilerplate-backend/packages/payment"
 	payment_interfaces "github.com/ESSantana/boilerplate-backend/packages/payment/interfaces"
+	"github.com/gofiber/fiber/v3"
 )
 
 type PaymentController struct {
@@ -31,53 +33,55 @@ func NewPaymentController(logger log.Logger, serviceManager svc_interfaces.Servi
 	}
 }
 
-func (ctlr *PaymentController) ExecutePayment(response http.ResponseWriter, request *http.Request) {
-	ctxWithTimeout, cancel := context.WithTimeout(request.Context(), constants.DefaultTimeout)
+func (ctlr *PaymentController) ExecutePayment(ctx fiber.Ctx) error {
+	context, cancel := context.WithTimeout(ctx.Context(), constants.DefaultTimeout)
 	defer cancel()
 
-	requestBody := utils.ReadBody[dto.PaymentInfo](request, response)
+	requestBody := utils.ReadBody[dto.PaymentInfo](&ctx)
 	if len(requestBody.Items) == 0 {
-		return
+    utils.CreateResponse(&ctx, http.StatusBadRequest, errors.New("items cannot be empty"))
+		return nil
 	}
-
 	ctlr.logger.Debugf("Payment request received: %v", requestBody)
 
 	provider, err := ctlr.paymentManager.NewMercadoPagoProvider()
 	if err != nil {
-		utils.CreateResponse(&response, http.StatusInternalServerError, err)
-		return
+		utils.CreateResponse(&ctx, http.StatusInternalServerError, err)
+		return nil
 	}
 
-	providerResponse, err := provider.ExecutePayment(ctxWithTimeout, requestBody)
+	providerResponse, err := provider.ExecutePayment(context, requestBody)
 	if err != nil {
-		utils.CreateResponse(&response, http.StatusInternalServerError, &json.UnmarshalTypeError{})
-		return
+		utils.CreateResponse(&ctx, http.StatusInternalServerError, &json.UnmarshalTypeError{})
+		return nil
 	}
 
 	bytes, err := json.Marshal(*providerResponse)
 	if err != nil {
-		utils.CreateResponse(&response, http.StatusInternalServerError, err)
-		return
+		utils.CreateResponse(&ctx, http.StatusInternalServerError, err)
+		return nil
 	}
 
-	var responseBody map[string]interface{}
+	var responseBody map[string]any
 	err = json.Unmarshal(bytes, &responseBody)
 	if err != nil {
-		utils.CreateResponse(&response, http.StatusInternalServerError, err)
-		return
+		utils.CreateResponse(&ctx, http.StatusInternalServerError, err)
+		return nil
 	}
 
-	utils.CreateResponse(&response, http.StatusOK, nil, responseBody)
+	utils.CreateResponse(&ctx, http.StatusOK, nil, responseBody)
+	return nil
 }
 
-func (ctlr *PaymentController) PaymentWebhook(response http.ResponseWriter, request *http.Request) {
-	_, cancel := context.WithTimeout(request.Context(), constants.DefaultTimeout)
+func (ctlr *PaymentController) PaymentWebhook(ctx fiber.Ctx) error {
+	_, cancel := context.WithTimeout(ctx.Context(), constants.DefaultTimeout)
 	defer cancel()
 
-	requestBody := utils.ReadBody[map[string]interface{}](request, response)
+	requestBody := utils.ReadBody[map[string]any](&ctx)
 	if requestBody == nil {
-		return
+		return nil
 	}
 
 	ctlr.logger.Debugf("Payment webhook received: %v", requestBody)
+	return nil
 }

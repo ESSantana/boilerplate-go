@@ -2,9 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"net"
-	"net/http"
 	"os"
 
 	"github.com/ESSantana/boilerplate-backend/internal/repositories"
@@ -14,9 +11,9 @@ import (
 	svc_interfaces "github.com/ESSantana/boilerplate-backend/internal/services/interfaces"
 	"github.com/ESSantana/boilerplate-backend/packages/cache"
 	cache_interfaces "github.com/ESSantana/boilerplate-backend/packages/cache/interfaces"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/cors"
+	"github.com/gofiber/fiber/v3"
+	mw_cors "github.com/gofiber/fiber/v3/middleware/cors"
+	mw_logger "github.com/gofiber/fiber/v3/middleware/logger"
 
 	"github.com/ESSantana/boilerplate-backend/packages/log"
 )
@@ -25,42 +22,36 @@ var logger log.Logger
 var repoManager repo_interfaces.RepositoryManager
 var serviceManager svc_interfaces.ServiceManager
 var cacheManager cache_interfaces.CacheManager
-var router *chi.Mux
+var app *fiber.App
 
 func main() {
 	logger = log.NewLogger(log.DEBUG)
 	singletonCache()
 	singletonRepository(context.Background())
 	singletonService(logger)
-	setupRoute()
 
-	defer startServer(router)
-	fmt.Printf("Server listening on port :%s\n", os.Getenv("SERVER_PORT"))
+	startServer()
 }
 
-func setupRoute() {
-	router = chi.NewRouter()
-	router.Use(middleware.Logger)
-	router.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"https://*", "http://*"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-		ExposedHeaders:   []string{"Link"},
+func startServer() {
+	app = fiber.New()
+
+	app.Use(mw_logger.New())
+	app.Use(mw_cors.New(mw_cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposeHeaders:    []string{"Link"},
 		AllowCredentials: false,
 		MaxAge:           300,
 	}))
 
-	routes.ConfigRoutes(router, logger, serviceManager, cacheManager)
-}
+	routes.ConfigRoutes(app, logger, serviceManager, cacheManager)
 
-func startServer(router *chi.Mux) {
-	port := ":" + os.Getenv("SERVER_PORT")
-	listen, err := net.Listen("tcp", port)
+	err := app.Listen(":" + os.Getenv("SERVER_PORT"))
 	if err != nil {
-		panic(err)
-	}
-	if err := http.Serve(listen, router); err != nil {
-		panic(err)
+		logger.Error(err.Error())
+		os.Exit(1)
 	}
 }
 
@@ -73,6 +64,7 @@ func singletonRepository(ctx context.Context) {
 }
 
 func singletonService(logger log.Logger) {
+	logger.Info("Setup service manager...")
 	if serviceManager != nil {
 		return
 	}

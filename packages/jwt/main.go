@@ -2,12 +2,12 @@ package jwt
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/ESSantana/boilerplate-backend/packages/jwt/domain"
+	"github.com/gofiber/fiber/v3"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -51,8 +51,8 @@ func DecodeAuthToken(tokenString string) (domain.UserClaimData, error) {
 	}, nil
 }
 
-func ValidateUserRequestIssuer(request *http.Request, validateFunc func(...string) bool) error {
-	tokenString := request.Header.Get("Authorization")
+func ValidateUserRequestIssuer(ctx fiber.Ctx, validateFunc func(...string) bool) error {
+	tokenString := ctx.Get("Authorization")
 	if !strings.Contains(tokenString, "Bearer ") {
 		return fmt.Errorf("authorization header missing Bearer token")
 	}

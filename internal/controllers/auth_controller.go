@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"context"
-	"encoding/json"
+	"errors"
 	"os"
 	"time"
 
@@ -10,7 +10,6 @@ import (
 
 	"github.com/ESSantana/boilerplate-backend/internal/domain/constants"
 	"github.com/ESSantana/boilerplate-backend/internal/domain/dto"
-	"github.com/ESSantana/boilerplate-backend/internal/domain/errors"
 	"github.com/ESSantana/boilerplate-backend/internal/domain/models"
 	svc_interfaces "github.com/ESSantana/boilerplate-backend/internal/services/interfaces"
 	"github.com/ESSantana/boilerplate-backend/internal/utils"
@@ -21,7 +20,7 @@ import (
 	"github.com/ESSantana/boilerplate-backend/packages/log"
 	"github.com/ESSantana/boilerplate-backend/packages/sso"
 	sso_interfaces "github.com/ESSantana/boilerplate-backend/packages/sso/interfaces"
-	"github.com/go-chi/chi/v5"
+	"github.com/gofiber/fiber/v3"
 )
 
 type AuthController struct {
@@ -56,56 +55,55 @@ func NewAuthController(logger log.Logger, serviceManager svc_interfaces.ServiceM
 	}
 }
 
-func (ctlr *AuthController) CustomerLogin(response http.ResponseWriter, request *http.Request) {
-	context, cancel := context.WithTimeout(request.Context(), constants.DefaultTimeout)
+func (ctlr *AuthController) CustomerLogin(ctx fiber.Ctx) error {
+	context, cancel := context.WithTimeout(ctx.Context(), constants.DefaultTimeout)
 	defer cancel()
 
-	var loginRequest dto.LoginRequest
-	err := json.NewDecoder(request.Body).Decode(&loginRequest)
-	if err != nil {
-		utils.CreateResponse(&response, http.StatusBadRequest, errors.New("payload format is invalid"))
-		return
+	loginRequest := utils.ReadBody[dto.LoginRequest](&ctx)
+	if !loginRequest.IsValid() {
+		utils.CreateResponse(&ctx, http.StatusBadRequest, errors.New("invalid login request"))
+		return nil
 	}
 	ctlr.logger.Debugf("login request received: %v", loginRequest)
 
 	customerService := ctlr.serviceManager.NewCustomerService()
 	customer, err := customerService.GetCustomerLogin(context, loginRequest.Email, loginRequest.PasswordHash)
 	if err != nil {
-		utils.CreateResponse(&response, http.StatusInternalServerError, err)
-		return
+		utils.CreateResponse(&ctx, http.StatusInternalServerError, err)
+		return nil
 	}
 
 	token, err := jwt.GenerateAuthToken(customer.ID, customer.Name, constants.RoleCustomer)
 	if err != nil {
 		ctlr.logger.Errorf("auth token error: %s", err.Error())
-		utils.CreateResponse(&response, http.StatusInternalServerError, err)
-		return
+		utils.CreateResponse(&ctx, http.StatusInternalServerError, err)
+		return nil
 	}
 
 	responseData := dto.LoginResponse{
 		Token: token,
 	}
 
-	utils.CreateResponse(&response, http.StatusOK, nil, responseData)
+	utils.CreateResponse(&ctx, http.StatusOK, nil, responseData)
+	return nil
 }
 
-func (ctlr *AuthController) RecoverPassword(response http.ResponseWriter, request *http.Request) {
-	context, cancel := context.WithTimeout(request.Context(), constants.DefaultTimeout)
+func (ctlr *AuthController) RecoverPassword(ctx fiber.Ctx) error {
+	context, cancel := context.WithTimeout(ctx.Context(), constants.DefaultTimeout)
 	defer cancel()
 
-	var recoverRequest dto.RecoverPasswordRequest
-	err := json.NewDecoder(request.Body).Decode(&recoverRequest)
-	if err != nil {
-		utils.CreateResponse(&response, http.StatusBadRequest, errors.New("payload format is invalid"))
-		return
+	recoverRequest := utils.ReadBody[dto.RecoverPasswordRequest](&ctx)
+	if !recoverRequest.IsValid() {
+		utils.CreateResponse(&ctx, http.StatusBadRequest, errors.New("invalid recover request"))
+		return nil
 	}
 	ctlr.logger.Debugf("recover request received: %v", recoverRequest)
 
 	customerService := ctlr.serviceManager.NewCustomerService()
 	customer, err := customerService.GetCustomerByEmail(context, recoverRequest.Email)
 	if err != nil {
-		utils.CreateResponse(&response, http.StatusInternalServerError, err)
-		return
+		utils.CreateResponse(&ctx, http.StatusInternalServerError, err)
+		return nil
 	}
 
 	responseData := dto.RecoverPasswordResponse{
@@ -113,59 +111,61 @@ func (ctlr *AuthController) RecoverPassword(response http.ResponseWriter, reques
 	}
 
 	if customer.ID == "" {
-		utils.CreateResponse(&response, http.StatusOK, nil, responseData)
-		return
+		utils.CreateResponse(&ctx, http.StatusOK, nil, responseData)
+		return nil
 	}
 
 	err = ctlr.emailManager.SendRecoverPasswordEmail(context, customer)
 	if err != nil {
-		utils.CreateResponse(&response, http.StatusInternalServerError, err)
-		return
+		utils.CreateResponse(&ctx, http.StatusInternalServerError, err)
+		return nil
 	}
 
-	utils.CreateResponse(&response, http.StatusOK, nil, responseData)
+	utils.CreateResponse(&ctx, http.StatusOK, nil, responseData)
+	return nil
 }
 
-func (ctlr *AuthController) SSORequest(response http.ResponseWriter, request *http.Request) {
-	_, cancel := context.WithTimeout(request.Context(), constants.DefaultTimeout)
+func (ctlr *AuthController) SSORequest(ctx fiber.Ctx) error {
+	context, cancel := context.WithTimeout(ctx.Context(), constants.DefaultTimeout)
 	defer cancel()
 
-	providerName := chi.URLParam(request, "provider")
+	providerName := ctx.Params("provider")
 	provider, err := ctlr.ssoManager.GetProvider(providerName)
 	if err != nil {
-		utils.CreateResponse(&response, http.StatusInternalServerError, err)
-		return
+		utils.CreateResponse(&ctx, http.StatusInternalServerError, err)
+		return nil
 	}
 
 	url, state := provider.GetSigninURL()
-	err = ctlr.cacheManager.SetFlagWithExpiration(request.Context(), state, true, time.Minute*3)
+	err = ctlr.cacheManager.SetFlagWithExpiration(context, state, true, time.Minute*3)
 	if err != nil {
-		utils.CreateResponse(&response, http.StatusInternalServerError, err)
-		return
+		utils.CreateResponse(&ctx, http.StatusInternalServerError, err)
+		return nil
 	}
 
-	responseBody := map[string]interface{}{
+	responseBody := map[string]any{
 		"redirect_url": url,
 	}
 
-	utils.CreateResponse(&response, http.StatusOK, nil, responseBody)
+	utils.CreateResponse(&ctx, http.StatusOK, nil, responseBody)
+	return nil
 }
 
-func (ctlr *AuthController) SSOCallback(response http.ResponseWriter, request *http.Request) {
-	ctx, cancel := context.WithTimeout(request.Context(), constants.DefaultTimeout)
+func (ctlr *AuthController) SSOCallback(ctx fiber.Ctx) error {
+	context, cancel := context.WithTimeout(ctx.Context(), constants.DefaultTimeout)
 	defer cancel()
 
-	providerName := chi.URLParam(request, "provider")
+	providerName := ctx.Params("provider")
 	provider, err := ctlr.ssoManager.GetProvider(providerName)
 	if err != nil {
-		utils.CreateResponse(&response, http.StatusInternalServerError, err)
-		return
+		utils.CreateResponse(&ctx, http.StatusInternalServerError, err)
+		return nil
 	}
 
-	data, err := provider.GetUserData(request)
+	data, err := provider.GetUserData(ctx)
 	if err != nil {
-		utils.CreateResponse(&response, http.StatusInternalServerError, err)
-		return
+		utils.CreateResponse(&ctx, http.StatusInternalServerError, err)
+		return nil
 	}
 
 	customer := models.Customer{
@@ -176,19 +176,22 @@ func (ctlr *AuthController) SSOCallback(response http.ResponseWriter, request *h
 	}
 
 	userService := ctlr.serviceManager.NewCustomerService()
-	customerCreated, err := userService.CreateCustomer(ctx, customer)
+	customerCreated, err := userService.CreateCustomer(context, customer)
 	if err != nil {
-		utils.CreateResponse(&response, http.StatusInternalServerError, err)
-		return
+		utils.CreateResponse(&ctx, http.StatusInternalServerError, err)
+		return nil
 	}
 
 	token, err := jwt.GenerateAuthToken(customerCreated.ID, customerCreated.Name, constants.RoleCustomer)
 	if err != nil {
 		ctlr.logger.Errorf("auth token error: %s", err.Error())
-		utils.CreateResponse(&response, http.StatusInternalServerError, err)
-		return
+		utils.CreateResponse(&ctx, http.StatusInternalServerError, err)
+		return nil
 	}
 
 	url := os.Getenv("FRONTEND_URL") + "?token=" + token
-	http.Redirect(response, request, url, http.StatusSeeOther)
+	ctx.Redirect().To(url)
+	ctx.Redirect().Status(http.StatusFound)
+
+	return nil
 }

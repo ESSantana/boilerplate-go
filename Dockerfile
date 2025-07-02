@@ -10,7 +10,7 @@ COPY . ./
 RUN CGO_ENABLE=1 GOOS=linux go build -o /boilerplate-api ./cmd/api/main.go
 
 # BUILD STATIC BINARY
-FROM busybox:1.37 as busybox
+FROM busybox:1.37 AS busybox
 
 # SETUP CONTAINER RELEASE
 FROM gcr.io/distroless/base-debian12 AS release-stage

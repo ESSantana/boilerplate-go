@@ -1,36 +1,36 @@
 providers:
-    docker:
-        endpoint: "unix:///var/run/docker.sock"
-        exposedByDefault: false
-        network: proxy
-        watch: true
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    network: proxy
+    watch: true
 
 entryPoints:
-    web:
-        address: ":80"
-        http:
-            redirections:
-                entryPoint:
-                    to: websecure
-                    scheme: https
-                    permanent: true
-    websecure:
-        address: ":443"
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+  websecure:
+    address: ":443"
 
 certificatesResolvers:
-    lets-encrypt:
-        acme:
-            tlsChallenge: {}
-            email: "contato@emershow.com"
-            storage: "/letsencrypt/acme.json"
-            
+  lets-encrypt:
+    acme:
+      tlsChallenge: {}
+      email: "contato@emershow.com"
+      storage: "/letsencrypt/acme.json"
+
 log:
-    filePath: /traefik/logs/traefik.log
-    format: json
-    level: WARN
+  filePath: /traefik/logs/traefik.log
+  format: json
+  level: WARN
 
 accessLog:
-    filePath: /traefik/logs/access.log
-    format: json
-    filters:
-        minDuration: 100ms
+  filePath: /traefik/logs/access.log
+  format: json
+  filters:
+    minDuration: 100ms

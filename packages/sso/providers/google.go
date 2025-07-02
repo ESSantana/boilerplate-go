@@ -9,6 +9,7 @@ import (
 	"github.com/ESSantana/boilerplate-backend/internal/domain/dto"
 	cache_interfaces "github.com/ESSantana/boilerplate-backend/packages/cache/interfaces"
 	"github.com/ESSantana/boilerplate-backend/packages/sso/interfaces"
+	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -50,15 +51,15 @@ func (provider *googleSSOProvider) GetSigninURL() (signinURL, userState string) 
 	return url, id
 }
 
-func (provider *googleSSOProvider) GetUserData(callbackRequest *http.Request) (data dto.UserDataSSO, err error) {
-	state := callbackRequest.FormValue("state")
-	code := callbackRequest.FormValue("code")
+func (provider *googleSSOProvider) GetUserData(ctx fiber.Ctx) (data dto.UserDataSSO, err error) {
+	state := ctx.FormValue("state")
+	code := ctx.FormValue("code")
 
-	if val, err := provider.cacheManager.GetFlag(callbackRequest.Context(), state); err != nil || !val {
+	if val, err := provider.cacheManager.GetFlag(ctx.Context(), state); err != nil || !val {
 		return data, errors.New("invalid user state")
 	}
 
-	token, err := provider.ssoProvider.Exchange(callbackRequest.Context(), code)
+	token, err := provider.ssoProvider.Exchange(ctx.Context(), code)
 	if err != nil {
 		return data, err
 	}

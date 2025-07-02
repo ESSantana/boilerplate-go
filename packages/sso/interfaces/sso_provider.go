@@ -1,12 +1,11 @@
 package interfaces
 
 import (
-	"net/http"
-
 	"github.com/ESSantana/boilerplate-backend/internal/domain/dto"
+	"github.com/gofiber/fiber/v3"
 )
 
 type SSOProvider interface {
 	GetSigninURL() (signinURL, userState string)
-	GetUserData(callbackRequest *http.Request) (data dto.UserDataSSO, err error)
+	GetUserData(ctx fiber.Ctx) (data dto.UserDataSSO, err error)
 }
