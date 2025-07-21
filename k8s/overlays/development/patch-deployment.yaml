@@ -1,0 +1,6 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: boilerplate-api-deployment
+spec:
+  replicas: 1

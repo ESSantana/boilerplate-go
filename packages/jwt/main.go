@@ -2,7 +2,6 @@ package jwt
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
@@ -11,7 +10,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func GenerateAuthToken(userID, userName, userRole string) (string, error) {
+func GenerateAuthToken(jwtSecret, userID, userName, userRole string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, domain.CustomClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			NotBefore: jwt.NewNumericDate(time.Now().Add(time.Second * 3)),
@@ -23,17 +22,17 @@ func GenerateAuthToken(userID, userName, userRole string) (string, error) {
 		Role:   userRole,
 	})
 
-	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))
+	tokenString, err := token.SignedString([]byte(jwtSecret))
 	return tokenString, err
 }
 
-func DecodeAuthToken(tokenString string) (domain.UserClaimData, error) {
+func DecodeAuthToken(jwtSecret, tokenString string) (domain.UserClaimData, error) {
 	var claims domain.CustomClaims
 	token, err := jwt.ParseWithClaims(tokenString, &claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(os.Getenv("JWT_SECRET_KEY")), nil
+		return []byte(jwtSecret), nil
 	})
 
 	if err != nil {
@@ -51,14 +50,14 @@ func DecodeAuthToken(tokenString string) (domain.UserClaimData, error) {
 	}, nil
 }
 
-func ValidateUserRequestIssuer(ctx fiber.Ctx, validateFunc func(...string) bool) error {
+func ValidateUserRequestIssuer(ctx fiber.Ctx, jwtSecret string, validateFunc func(...string) bool) error {
 	tokenString := ctx.Get("Authorization")
 	if !strings.Contains(tokenString, "Bearer ") {
 		return fmt.Errorf("authorization header missing Bearer token")
 	}
 	tokenString = tokenString[len("Bearer "):]
 
-	claims, err := DecodeAuthToken(tokenString)
+	claims, err := DecodeAuthToken(jwtSecret, tokenString)
 	if err != nil {
 		return err
 	}

@@ -5,6 +5,7 @@ import (
 
 	"net/http"
 
+	"github.com/ESSantana/boilerplate-backend/internal/config"
 	"github.com/ESSantana/boilerplate-backend/internal/domain/constants"
 	"github.com/ESSantana/boilerplate-backend/internal/domain/dto"
 	"github.com/ESSantana/boilerplate-backend/internal/domain/models"
@@ -17,13 +18,20 @@ import (
 )
 
 type CustomerController struct {
+	cfg            *config.Config
 	logger         log.Logger
 	serviceManager svc_interfaces.ServiceManager
 	cacheManager   cache_interfaces.CacheManager
 }
 
-func NewCustomerController(logger log.Logger, serviceManager svc_interfaces.ServiceManager, cacheManager cache_interfaces.CacheManager) CustomerController {
+func NewCustomerController(
+	cfg *config.Config,
+	logger log.Logger,
+	serviceManager svc_interfaces.ServiceManager,
+	cacheManager cache_interfaces.CacheManager,
+) CustomerController {
 	return CustomerController{
+		cfg:            cfg,
 		logger:         logger,
 		serviceManager: serviceManager,
 		cacheManager:   cacheManager,
@@ -37,7 +45,7 @@ func (ctlr *CustomerController) GetCustomerById(ctx fiber.Ctx) error {
 	customerId := ctx.Params("id")
 	ctlr.logger.Debugf("customer_id: %v", customerId)
 
-	err := jwt.ValidateUserRequestIssuer(ctx, utils.CreateUserValidation(customerId))
+	err := jwt.ValidateUserRequestIssuer(ctx, ctlr.cfg.JWT.SecretKey, utils.CreateUserValidation(customerId))
 	if err != nil {
 		utils.CreateResponse(&ctx, http.StatusForbidden, err)
 		return nil
@@ -69,7 +77,7 @@ func (ctlr *CustomerController) GetAllCustomers(ctx fiber.Ctx) error {
 		utils.CreateResponse(&ctx, http.StatusInternalServerError, err)
 		return nil
 	}
-  
+
 	if len(customers) == 0 {
 		utils.CreateResponse(&ctx, http.StatusNoContent, nil, "any customer found")
 		return nil
@@ -93,7 +101,7 @@ func (ctlr *CustomerController) Create(ctx fiber.Ctx) error {
 		return nil
 	}
 
-	token, err := jwt.GenerateAuthToken(customerCreated.ID, customerCreated.Name, constants.RoleCustomer)
+	token, err := jwt.GenerateAuthToken(ctlr.cfg.JWT.SecretKey, customerCreated.ID, customerCreated.Name, constants.RoleCustomer)
 	if err != nil {
 		ctlr.logger.Errorf("auth token error: %s", err.Error())
 		utils.CreateResponse(&ctx, http.StatusInternalServerError, err)
@@ -115,7 +123,7 @@ func (ctlr *CustomerController) Update(ctx fiber.Ctx) error {
 	customer := utils.ReadBody[models.Customer](&ctx)
 	ctlr.logger.Debugf("customer received: %v", customer)
 
-	err := jwt.ValidateUserRequestIssuer(ctx, utils.CreateUserValidation(customer.ID))
+	err := jwt.ValidateUserRequestIssuer(ctx, ctlr.cfg.JWT.SecretKey, utils.CreateUserValidation(customer.ID))
 	if err != nil {
 		utils.CreateResponse(&ctx, http.StatusForbidden, err)
 		return nil
@@ -139,7 +147,7 @@ func (ctlr *CustomerController) SoftDelete(ctx fiber.Ctx) error {
 	customer := utils.ReadBody[models.Customer](&ctx)
 	ctlr.logger.Debugf("customer received: %v", customer)
 
-	err := jwt.ValidateUserRequestIssuer(ctx, utils.CreateUserValidation(customer.ID))
+	err := jwt.ValidateUserRequestIssuer(ctx, ctlr.cfg.JWT.SecretKey, utils.CreateUserValidation(customer.ID))
 	if err != nil {
 		utils.CreateResponse(&ctx, http.StatusForbidden, err)
 		return nil

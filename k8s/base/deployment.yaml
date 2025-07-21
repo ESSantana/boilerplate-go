@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: boilerplate-api-deployment
+  labels:
+    app: boilerplate-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: boilerplate-api
+  template:
+    metadata:
+      labels:
+        app: boilerplate-api
+    spec:
+      containers:
+      - name: boilerplate-api
+        image: boilerplate-api
+        imagePullPolicy: Never
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+          readOnly: true
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+        ports:
+          - containerPort: 8080
+            name: api-port
+      volumes:
+      - name: config-volume
+        configMap:
+          name: boilerplate-api-configmap

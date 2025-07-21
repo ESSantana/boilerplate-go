@@ -3,7 +3,6 @@ package providers
 import (
 	"context"
 	"encoding/json"
-	"os"
 
 	"github.com/ESSantana/boilerplate-backend/internal/domain/dto"
 	"github.com/ESSantana/boilerplate-backend/packages/log"
@@ -21,8 +20,8 @@ type mercadoPagoPaymentProvider struct {
 	mercadoPagoCfg *config.Config
 }
 
-func NewMercadoPagoProvider(logger log.Logger) (interfaces.PaymentProvider, error) {
-	cfg, err := config.New(os.Getenv("MERCADO_PAGO_TOKEN"))
+func NewMercadoPagoProvider(logger log.Logger, authToken string) (interfaces.PaymentProvider, error) {
+	cfg, err := config.New(authToken)
 	if err != nil {
 		return nil, err
 	}

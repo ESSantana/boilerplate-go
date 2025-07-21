@@ -7,6 +7,7 @@ import (
 
 	"net/http"
 
+	"github.com/ESSantana/boilerplate-backend/internal/config"
 	"github.com/ESSantana/boilerplate-backend/internal/domain/constants"
 	"github.com/ESSantana/boilerplate-backend/internal/domain/dto"
 	svc_interfaces "github.com/ESSantana/boilerplate-backend/internal/services/interfaces"
@@ -18,15 +19,21 @@ import (
 )
 
 type PaymentController struct {
+	cfg            *config.Config
 	logger         log.Logger
 	serviceManager svc_interfaces.ServiceManager
 	paymentManager payment_interfaces.PaymentManager
 }
 
-func NewPaymentController(logger log.Logger, serviceManager svc_interfaces.ServiceManager) PaymentController {
-	paymentManager := payment.NewPaymentManager(logger)
+func NewPaymentController(
+	cfg *config.Config,
+	logger log.Logger,
+	serviceManager svc_interfaces.ServiceManager,
+) PaymentController {
+	paymentManager := payment.NewPaymentManager(cfg, logger)
 
 	return PaymentController{
+		cfg:            cfg,
 		logger:         logger,
 		serviceManager: serviceManager,
 		paymentManager: paymentManager,
@@ -39,7 +46,7 @@ func (ctlr *PaymentController) ExecutePayment(ctx fiber.Ctx) error {
 
 	requestBody := utils.ReadBody[dto.PaymentInfo](&ctx)
 	if len(requestBody.Items) == 0 {
-    utils.CreateResponse(&ctx, http.StatusBadRequest, errors.New("items cannot be empty"))
+		utils.CreateResponse(&ctx, http.StatusBadRequest, errors.New("items cannot be empty"))
 		return nil
 	}
 	ctlr.logger.Debugf("Payment request received: %v", requestBody)

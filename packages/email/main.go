@@ -2,10 +2,9 @@ package email
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"os"
 
+	app_cfg "github.com/ESSantana/boilerplate-backend/internal/config"
 	"github.com/ESSantana/boilerplate-backend/internal/domain/models"
 	"github.com/ESSantana/boilerplate-backend/packages/email/domain"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -15,18 +14,14 @@ import (
 )
 
 type EmailManager struct {
+	cfg *app_cfg.Config
 	ses *sesv2.Client
 }
 
-func NewEmailManager() (*EmailManager, error) {
-	awsRegion, found := os.LookupEnv("AWS_DEFAULT_REGION")
-	if !found {
-		return nil, errors.New("AWS_DEFAULT_REGION not found")
-	}
-
+func NewEmailManager(appCfg *app_cfg.Config) (*EmailManager, error) {
 	cfg, err := config.LoadDefaultConfig(
 		context.Background(),
-		config.WithRegion(awsRegion),
+		config.WithRegion(appCfg.AWS.DefaultRegion),
 	)
 
 	if err != nil {
@@ -34,11 +29,11 @@ func NewEmailManager() (*EmailManager, error) {
 	}
 
 	ses := sesv2.NewFromConfig(cfg)
-	return &EmailManager{ses: ses}, nil
+	return &EmailManager{ses: ses, cfg: appCfg}, nil
 }
 
 func (em *EmailManager) SendRecoverPasswordEmail(ctx context.Context, customer models.Customer) (err error) {
-	if os.Getenv("ENV") == "development" {
+	if em.cfg.Server.Environment == "development" {
 		fmt.Println("Mock sending email to:", customer.Email)
 		return nil
 	}

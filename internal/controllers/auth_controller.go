@@ -3,11 +3,11 @@ package controllers
 import (
 	"context"
 	"errors"
-	"os"
 	"time"
 
 	"net/http"
 
+	"github.com/ESSantana/boilerplate-backend/internal/config"
 	"github.com/ESSantana/boilerplate-backend/internal/domain/constants"
 	"github.com/ESSantana/boilerplate-backend/internal/domain/dto"
 	"github.com/ESSantana/boilerplate-backend/internal/domain/models"
@@ -24,6 +24,7 @@ import (
 )
 
 type AuthController struct {
+	cfg            *config.Config
 	logger         log.Logger
 	serviceManager svc_interfaces.ServiceManager
 	ssoManager     sso_interfaces.SSOManager
@@ -31,22 +32,28 @@ type AuthController struct {
 	emailManager   email_interfaces.EmailManager
 }
 
-func NewAuthController(logger log.Logger, serviceManager svc_interfaces.ServiceManager, cacheManager cache_interfaces.CacheManager) AuthController {
+func NewAuthController(
+	cfg *config.Config,
+	logger log.Logger,
+	serviceManager svc_interfaces.ServiceManager,
+	cacheManager cache_interfaces.CacheManager,
+) AuthController {
 	ssoManager := sso.NewSSOManager(
 		cacheManager,
 		sso.GoogleProvider{
-			RedirectURL:  os.Getenv("GOOGLE_REDIRECT_URL"),
-			ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
-			ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
+			RedirectURL:  cfg.Google.RedirectURL,
+			ClientID:     cfg.Google.ClientID,
+			ClientSecret: cfg.Google.ClientSecret,
 		},
 	)
 
-	emailManager, err := email.NewEmailManager()
+	emailManager, err := email.NewEmailManager(cfg)
 	if err != nil {
 		logger.Errorf("failed to create email manager: %s", err.Error())
 	}
 
 	return AuthController{
+		cfg:            cfg,
 		logger:         logger,
 		serviceManager: serviceManager,
 		ssoManager:     ssoManager,
@@ -73,7 +80,7 @@ func (ctlr *AuthController) CustomerLogin(ctx fiber.Ctx) error {
 		return nil
 	}
 
-	token, err := jwt.GenerateAuthToken(customer.ID, customer.Name, constants.RoleCustomer)
+	token, err := jwt.GenerateAuthToken(ctlr.cfg.JWT.SecretKey, customer.ID, customer.Name, constants.RoleCustomer)
 	if err != nil {
 		ctlr.logger.Errorf("auth token error: %s", err.Error())
 		utils.CreateResponse(&ctx, http.StatusInternalServerError, err)
@@ -182,14 +189,14 @@ func (ctlr *AuthController) SSOCallback(ctx fiber.Ctx) error {
 		return nil
 	}
 
-	token, err := jwt.GenerateAuthToken(customerCreated.ID, customerCreated.Name, constants.RoleCustomer)
+	token, err := jwt.GenerateAuthToken(ctlr.cfg.JWT.SecretKey, customerCreated.ID, customerCreated.Name, constants.RoleCustomer)
 	if err != nil {
 		ctlr.logger.Errorf("auth token error: %s", err.Error())
 		utils.CreateResponse(&ctx, http.StatusInternalServerError, err)
 		return nil
 	}
 
-	url := os.Getenv("FRONTEND_URL") + "?token=" + token
+	url := ctlr.cfg.Frontend.AuthRedirect + "?token=" + token
 	ctx.Redirect().To(url)
 	ctx.Redirect().Status(http.StatusFound)
 

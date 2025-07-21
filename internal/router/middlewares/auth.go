@@ -5,11 +5,12 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/ESSantana/boilerplate-backend/internal/config"
 	"github.com/ESSantana/boilerplate-backend/packages/jwt"
 	"github.com/gofiber/fiber/v3"
 )
 
-func AuthMiddleware(allowedRoles []string) fiber.Handler {
+func AuthMiddleware(cfg *config.Config, allowedRoles []string) fiber.Handler {
 	return func(ctx fiber.Ctx) error {
 		authHeader := ctx.Get("Authorization")
 		if !strings.Contains(authHeader, "Bearer ") {
@@ -23,7 +24,7 @@ func AuthMiddleware(allowedRoles []string) fiber.Handler {
 			return nil
 		}
 
-		userClaimData, err := jwt.DecodeAuthToken(token)
+		userClaimData, err := jwt.DecodeAuthToken(cfg.JWT.SecretKey, token)
 		if err != nil {
 			ctx.Status(http.StatusUnauthorized)
 			return nil

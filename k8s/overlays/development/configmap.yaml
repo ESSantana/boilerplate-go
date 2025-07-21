@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: boilerplate-api-configmap
+immutable: true
+data:
+  .env: |
+    SERVER_PORT: "8080"
+    SERVER_ENVIRONMENT: "development"
+    SERVER_LOG_LEVEL: "debug"
+
+    DATABASE_USER: "boilerplate-api"
+    DATABASE_PASSWORD: "password"
+    DATABASE_HOST: "db"
+    DATABASE_PORT: "5432"
+    DATABASE_NAME: "boilerplate-db"
+
+    REDIS_USER: "boilerplate-api"
+    REDIS_PASSWORD: "password"
+    REDIS_HOST: "cache"
+    REDIS_PORT: "6379"
+
+    GOOGLE_CLIENT_ID: "14302173819-3rfe2jq2ptfg53njtvmrgtmhlqom435a.apps.googleusercontent.com"
+    GOOGLE_CLIENT_SECRET: "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"
+    GOOGLE_REDIRECT_URL: "https://localhost/auth/callback/google"
+
+    MERCADO_PAGO_TOKEN: "TEST-2332090575580034-111111-2b4a678d9a00053264d90a30dbd2aac0-494198267"
+
+    JWT_SECRET_KEY: "mock-jwt-token"
+
+    AWS_DEFAULT_REGION: "sa-east-1"
+
+    FRONTEND_AUTH_REDIRECT: "http://localhost:3000"

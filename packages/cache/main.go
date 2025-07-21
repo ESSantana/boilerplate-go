@@ -2,10 +2,9 @@ package cache
 
 import (
 	"context"
-	"os"
 	"time"
 
-	"github.com/ESSantana/boilerplate-backend/internal/utils"
+	"github.com/ESSantana/boilerplate-backend/internal/config"
 	"github.com/ESSantana/boilerplate-backend/packages/cache/interfaces"
 	"github.com/redis/go-redis/v9"
 )
@@ -14,19 +13,11 @@ type cacheManager struct {
 	client *redis.Client
 }
 
-func NewCacheManager() interfaces.CacheManager {
-
-	redisUser := utils.RetrieveSecretValue("REDIS_USER_FILE")
-	redisPass := utils.RetrieveSecretValue("REDIS_PASSWORD_FILE")
-	if os.Getenv("ENV") == "development" {
-		redisUser = os.Getenv("REDIS_USER")
-		redisPass = os.Getenv("REDIS_PASSWORD")
-	}
-
+func NewCacheManager(cfg *config.Config) interfaces.CacheManager {
 	client := redis.NewClient(&redis.Options{
-		Addr:     os.Getenv("REDIS_HOST"),
-		Username: redisUser,
-		Password: redisPass,
+		Addr:     cfg.Redis.Host + ":" + cfg.Redis.Port,
+		Username: cfg.Redis.User,
+		Password: cfg.Redis.Password,
 		DB:       0,
 	})
 

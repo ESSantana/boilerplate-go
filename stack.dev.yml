@@ -64,23 +64,6 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
-    environment:
-      - ENV=development
-      - DB_USER=boilerplate-api
-      - DB_PASS=password
-      - REDIS_USER=boilerplate-api
-      - REDIS_PASSWORD=password
-      - GOOGLE_CLIENT_ID=14302173819-3rfe2jq2ptfg53njtvmrgtmhlqom435a.apps.googleusercontent.com
-      - GOOGLE_CLIENT_SECRET=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
-      - MERCADO_PAGO_TOKEN=TEST-2332090575580034-111111-2b4a678d9a00053264d90a30dbd2aac0-494198267
-      - JWT_SECRET_KEY=mock-jwt-token
-      - GOOGLE_REDIRECT_URL=https://localhost/auth/callback/google
-      - DB_HOST=db:3306
-      - DB_NAME=boilerplate-db
-      - SERVER_PORT=8080
-      - REDIS_HOST=cache:6379
-      - FRONTEND_URL=http://localhost:3000/
-      - AWS_DEFAULT_REGION=sa-east-1
     deploy:
       update_config:
         order: start-first

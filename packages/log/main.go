@@ -16,13 +16,13 @@ type Logger interface {
 	Errorf(message string, args ...interface{})
 }
 
-type LogLevel = int8
+type LogLevel = string
 
 const (
-	DEBUG LogLevel = iota
-	INFO
-	WARN
-	ERROR
+	DEBUG LogLevel = "debug"
+	INFO  LogLevel = "info"
+	WARN  LogLevel = "warn"
+	ERROR LogLevel = "error"
 )
 
 type logger struct {
