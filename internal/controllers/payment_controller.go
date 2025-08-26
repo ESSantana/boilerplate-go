@@ -20,21 +20,18 @@ import (
 
 type PaymentController struct {
 	cfg            *config.Config
-	logger         log.Logger
 	serviceManager svc_interfaces.ServiceManager
 	paymentManager payment_interfaces.PaymentManager
 }
 
 func NewPaymentController(
 	cfg *config.Config,
-	logger log.Logger,
 	serviceManager svc_interfaces.ServiceManager,
 ) PaymentController {
-	paymentManager := payment.NewPaymentManager(cfg, logger)
+	paymentManager := payment.NewPaymentManager(cfg)
 
 	return PaymentController{
 		cfg:            cfg,
-		logger:         logger,
 		serviceManager: serviceManager,
 		paymentManager: paymentManager,
 	}
@@ -49,7 +46,7 @@ func (ctlr *PaymentController) ExecutePayment(ctx fiber.Ctx) error {
 		utils.CreateResponse(&ctx, http.StatusBadRequest, errors.New("items cannot be empty"))
 		return nil
 	}
-	ctlr.logger.Debugf("Payment request received: %v", requestBody)
+	log.Debugf("Payment request received: %v", requestBody)
 
 	provider, err := ctlr.paymentManager.NewMercadoPagoProvider()
 	if err != nil {
@@ -89,6 +86,6 @@ func (ctlr *PaymentController) PaymentWebhook(ctx fiber.Ctx) error {
 		return nil
 	}
 
-	ctlr.logger.Debugf("Payment webhook received: %v", requestBody)
+	log.Debugf("Payment webhook received: %v", requestBody)
 	return nil
 }

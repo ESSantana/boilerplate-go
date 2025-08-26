@@ -4,18 +4,15 @@ import (
 	repo_interfaces "github.com/ESSantana/boilerplate-backend/internal/repositories/interfaces"
 	"github.com/ESSantana/boilerplate-backend/internal/services/interfaces"
 	cache_interfaces "github.com/ESSantana/boilerplate-backend/packages/cache/interfaces"
-	"github.com/ESSantana/boilerplate-backend/packages/log"
 )
 
 type serviceManager struct {
-	logger       log.Logger
 	repoManager  repo_interfaces.RepositoryManager
 	cacheManager cache_interfaces.CacheManager
 }
 
-func NewServiceManager(logger log.Logger, repoManager repo_interfaces.RepositoryManager, cacheManager cache_interfaces.CacheManager) interfaces.ServiceManager {
+func NewServiceManager(repoManager repo_interfaces.RepositoryManager, cacheManager cache_interfaces.CacheManager) interfaces.ServiceManager {
 	return &serviceManager{
-		logger:       logger,
 		repoManager:  repoManager,
 		cacheManager: cacheManager,
 	}
@@ -39,5 +36,5 @@ func (sm *serviceManager) HealthCheck() (dbHealthStatus, cacheHealthStatus bool)
 }
 
 func (sm *serviceManager) NewCustomerService() interfaces.CustomerService {
-	return newCustomerService(sm.logger, sm.repoManager)
+	return newCustomerService(sm.repoManager)
 }

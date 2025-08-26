@@ -1,85 +1,76 @@
 package log
 
 import (
+	"os"
+	"time"
+
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
-type Logger interface {
-	Debug(message string)
-	Info(message string)
-	Warn(message string)
-	Error(message string)
-
-	Debugf(message string, args ...interface{})
-	Infof(message string, args ...interface{})
-	Warnf(message string, args ...interface{})
-	Errorf(message string, args ...interface{})
+var LogLevel = map[string]zerolog.Level{
+	"TRACE":    -1,
+	"DEBUG":    0,
+	"INFO":     1,
+	"WARN":     2,
+	"ERROR":    3,
+	"FATAL":    4,
+	"PANIC":    5,
+	"DISABLED": 7,
 }
 
-type LogLevel = string
-
-const (
-	DEBUG LogLevel = "debug"
-	INFO  LogLevel = "info"
-	WARN  LogLevel = "warn"
-	ERROR LogLevel = "error"
-)
-
-type logger struct {
-	LogLevel LogLevel
+func SetGlobalLevel(level zerolog.Level) {
+	zerolog.SetGlobalLevel(level)
 }
 
-func NewLogger(level LogLevel) Logger {
-	if level < DEBUG || level > INFO {
-		level = DEBUG
+func New(data map[string]any) {
+	zerologContext := zerolog.New(os.Stdout).With()
+	for k, v := range data {
+		switch v := v.(type) {
+		case string:
+			zerologContext = zerologContext.Str(k, v)
+		case int:
+			zerologContext = zerologContext.Int(k, v)
+		case float64:
+			zerologContext = zerologContext.Float64(k, v)
+		case bool:
+			zerologContext = zerologContext.Bool(k, v)
+		case time.Time:
+			zerologContext = zerologContext.Time(k, v)
+		}
 	}
 
-	return &logger{
-		LogLevel: level,
-	}
+	log.Logger = zerologContext.Timestamp().Logger()
 }
 
-func (l *logger) Debug(message string) {
-	if l.LogLevel <= DEBUG {
-		log.Debug().Msg(message)
-	}
+func Debug(message string) {
+	log.Debug().Msg(message)
 }
 
-func (l *logger) Info(message string) {
-	if l.LogLevel <= INFO {
-		log.Info().Msg(message)
-	}
+func Info(message string) {
+	log.Info().Msg(message)
 }
 
-func (l *logger) Warn(message string) {
-	if l.LogLevel <= WARN {
-		log.Warn().Msg(message)
-	}
+func Warn(message string) {
+	log.Warn().Msg(message)
 }
 
-func (l *logger) Error(message string) {
-	if l.LogLevel <= ERROR {
-		log.Error().Msg(message)
-	}
+func Error(message string) {
+	log.Error().Msg(message)
 }
 
-func (l *logger) Debugf(message string, args ...interface{}) {
-	if l.LogLevel <= DEBUG {
-		log.Debug().Msgf(message, args...)
-	}
+func Debugf(message string, args ...any) {
+	log.Debug().Msgf(message, args...)
 }
-func (l *logger) Infof(message string, args ...interface{}) {
-	if l.LogLevel <= INFO {
-		log.Info().Msgf(message, args...)
-	}
+
+func Infof(message string, args ...any) {
+	log.Info().Msgf(message, args...)
 }
-func (l *logger) Warnf(message string, args ...interface{}) {
-	if l.LogLevel <= WARN {
-		log.Warn().Msgf(message, args...)
-	}
+
+func Warnf(message string, args ...any) {
+	log.Warn().Msgf(message, args...)
 }
-func (l *logger) Errorf(message string, args ...interface{}) {
-	if l.LogLevel <= ERROR {
-		log.Error().Msgf(message, args...)
-	}
+
+func Errorf(message string, args ...any) {
+	log.Error().Msgf(message, args...)
 }

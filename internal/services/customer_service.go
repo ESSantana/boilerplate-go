@@ -16,19 +16,17 @@ import (
 )
 
 type customerService struct {
-	logger      log.Logger
 	repoManager repo_interfaces.RepositoryManager
 	validate    *validator.Validate
 }
 
-func newCustomerService(logger log.Logger, repoManager repo_interfaces.RepositoryManager) interfaces.CustomerService {
+func newCustomerService(repoManager repo_interfaces.RepositoryManager) interfaces.CustomerService {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 
 	validate.RegisterValidation("required_if_match_format", utils.ValidateRequiredIfFieldMatchFormat)
 	validate.RegisterValidation("required_if_not_match_format", utils.ValidateRequiredIfFieldNotMatchFormat)
 
 	return &customerService{
-		logger:      logger,
 		repoManager: repoManager,
 		validate:    validate,
 	}
@@ -65,7 +63,7 @@ func (svc *customerService) GetCustomerByExternalId(ctx context.Context, externa
 	customer, err = customerRepo.GetCustomerByExternalID(ctx, externalID)
 
 	if err != nil && !strings.Contains(err.Error(), "no rows in result set") {
-		svc.logger.Errorf("error at customerRepo.GetCustomerByExternalID: %s", err.Error())
+		log.Errorf("error at customerRepo.GetCustomerByExternalID: %s", err.Error())
 		return customer, err
 	}
 	return customer, nil
@@ -76,7 +74,7 @@ func (svc *customerService) GetCustomerByEmail(ctx context.Context, email string
 
 	customerPersisted, err := customerRepo.GetCustomerEmail(ctx, email)
 	if err != nil && !strings.Contains(err.Error(), "no rows in result set") {
-		svc.logger.Errorf("error at customerRepo.GetCustomerEmail: %s", err.Error())
+		log.Errorf("error at customerRepo.GetCustomerEmail: %s", err.Error())
 		return customer, err
 	}
 
@@ -88,7 +86,7 @@ func (svc *customerService) GetAllCustomers(ctx context.Context) (customers []mo
 	customers, err = customerRepo.GetAllCustomers(ctx)
 
 	if err != nil && !strings.Contains(err.Error(), "no rows in result set") {
-		svc.logger.Errorf("error at customerRepo.GetAllCustomers: %s", err.Error())
+		log.Errorf("error at customerRepo.GetAllCustomers: %s", err.Error())
 		return customers, err
 	}
 	return customers, nil
@@ -106,7 +104,7 @@ func (svc *customerService) CreateCustomer(ctx context.Context, customer models.
 
 	customerPersisted, err := customerRepo.GetCustomerEmail(ctx, customer.Email)
 	if err != nil && !strings.Contains(err.Error(), "no rows in result set") {
-		svc.logger.Errorf("error at customerRepo.GetCustomerEmail: %s", err.Error())
+		log.Errorf("error at customerRepo.GetCustomerEmail: %s", err.Error())
 		return customerCreated, err
 	}
 
@@ -116,7 +114,7 @@ func (svc *customerService) CreateCustomer(ctx context.Context, customer models.
 
 	err = customerRepo.CreateCustomer(ctx, customer)
 	if err != nil {
-		svc.logger.Errorf("error at customerRepo.CreateCustomer: %s", err.Error())
+		log.Errorf("error at customerRepo.CreateCustomer: %s", err.Error())
 		return customerCreated, errors.NewOperationError("error creating customer registry")
 	}
 
@@ -140,7 +138,7 @@ func (svc *customerService) UpdateCustomer(ctx context.Context, customer models.
 
 	err = customerRepo.UpdateCustomer(ctx, customer)
 	if err != nil {
-		svc.logger.Errorf("error at customerRepo.UpdateCustomer: %s", err.Error())
+		log.Errorf("error at customerRepo.UpdateCustomer: %s", err.Error())
 		return errors.NewOperationError("error updating customer registry")
 	}
 	return nil
@@ -159,7 +157,7 @@ func (svc *customerService) SoftDeleteCustomer(ctx context.Context, id string) e
 
 	err = customerRepo.SoftDeleteCustomer(ctx, id)
 	if err != nil {
-		svc.logger.Errorf("error at customerRepo.SoftDeleteCustomer: %s", err.Error())
+		log.Errorf("error at customerRepo.SoftDeleteCustomer: %s", err.Error())
 		return errors.NewOperationError("error deleting customer registry")
 	}
 	return nil

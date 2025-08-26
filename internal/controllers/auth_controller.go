@@ -25,7 +25,6 @@ import (
 
 type AuthController struct {
 	cfg            *config.Config
-	logger         log.Logger
 	serviceManager svc_interfaces.ServiceManager
 	ssoManager     sso_interfaces.SSOManager
 	cacheManager   cache_interfaces.CacheManager
@@ -34,7 +33,6 @@ type AuthController struct {
 
 func NewAuthController(
 	cfg *config.Config,
-	logger log.Logger,
 	serviceManager svc_interfaces.ServiceManager,
 	cacheManager cache_interfaces.CacheManager,
 ) AuthController {
@@ -49,12 +47,11 @@ func NewAuthController(
 
 	emailManager, err := email.NewEmailManager(cfg)
 	if err != nil {
-		logger.Errorf("failed to create email manager: %s", err.Error())
+		log.Errorf("failed to create email manager: %s", err.Error())
 	}
 
 	return AuthController{
 		cfg:            cfg,
-		logger:         logger,
 		serviceManager: serviceManager,
 		ssoManager:     ssoManager,
 		cacheManager:   cacheManager,
@@ -71,7 +68,7 @@ func (ctlr *AuthController) CustomerLogin(ctx fiber.Ctx) error {
 		utils.CreateResponse(&ctx, http.StatusBadRequest, errors.New("invalid login request"))
 		return nil
 	}
-	ctlr.logger.Debugf("login request received: %v", loginRequest)
+	log.Debugf("login request received: %v", loginRequest)
 
 	customerService := ctlr.serviceManager.NewCustomerService()
 	customer, err := customerService.GetCustomerLogin(context, loginRequest.Email, loginRequest.PasswordHash)
@@ -82,7 +79,7 @@ func (ctlr *AuthController) CustomerLogin(ctx fiber.Ctx) error {
 
 	token, err := jwt.GenerateAuthToken(ctlr.cfg.JWT.SecretKey, customer.ID, customer.Name, constants.RoleCustomer)
 	if err != nil {
-		ctlr.logger.Errorf("auth token error: %s", err.Error())
+		log.Errorf("auth token error: %s", err.Error())
 		utils.CreateResponse(&ctx, http.StatusInternalServerError, err)
 		return nil
 	}
@@ -104,7 +101,7 @@ func (ctlr *AuthController) RecoverPassword(ctx fiber.Ctx) error {
 		utils.CreateResponse(&ctx, http.StatusBadRequest, errors.New("invalid recover request"))
 		return nil
 	}
-	ctlr.logger.Debugf("recover request received: %v", recoverRequest)
+	log.Debugf("recover request received: %v", recoverRequest)
 
 	customerService := ctlr.serviceManager.NewCustomerService()
 	customer, err := customerService.GetCustomerByEmail(context, recoverRequest.Email)
@@ -191,7 +188,7 @@ func (ctlr *AuthController) SSOCallback(ctx fiber.Ctx) error {
 
 	token, err := jwt.GenerateAuthToken(ctlr.cfg.JWT.SecretKey, customerCreated.ID, customerCreated.Name, constants.RoleCustomer)
 	if err != nil {
-		ctlr.logger.Errorf("auth token error: %s", err.Error())
+		log.Errorf("auth token error: %s", err.Error())
 		utils.CreateResponse(&ctx, http.StatusInternalServerError, err)
 		return nil
 	}

@@ -19,20 +19,17 @@ import (
 
 type CustomerController struct {
 	cfg            *config.Config
-	logger         log.Logger
 	serviceManager svc_interfaces.ServiceManager
 	cacheManager   cache_interfaces.CacheManager
 }
 
 func NewCustomerController(
 	cfg *config.Config,
-	logger log.Logger,
 	serviceManager svc_interfaces.ServiceManager,
 	cacheManager cache_interfaces.CacheManager,
 ) CustomerController {
 	return CustomerController{
 		cfg:            cfg,
-		logger:         logger,
 		serviceManager: serviceManager,
 		cacheManager:   cacheManager,
 	}
@@ -43,7 +40,7 @@ func (ctlr *CustomerController) GetCustomerById(ctx fiber.Ctx) error {
 	defer cancel()
 
 	customerId := ctx.Params("id")
-	ctlr.logger.Debugf("customer_id: %v", customerId)
+	log.Debugf("customer_id: %v", customerId)
 
 	err := jwt.ValidateUserRequestIssuer(ctx, ctlr.cfg.JWT.SecretKey, utils.CreateUserValidation(customerId))
 	if err != nil {
@@ -92,7 +89,12 @@ func (ctlr *CustomerController) Create(ctx fiber.Ctx) error {
 	defer cancel()
 
 	customer := utils.ReadBody[models.Customer](&ctx)
-	ctlr.logger.Debugf("customer received: %v", customer)
+	log.New(map[string]any{
+		"name":  customer.Name,
+		"email": customer.Email,
+	})
+
+	log.Debug("create customer")
 
 	customerService := ctlr.serviceManager.NewCustomerService()
 	customerCreated, err := customerService.CreateCustomer(context, customer)
@@ -103,7 +105,7 @@ func (ctlr *CustomerController) Create(ctx fiber.Ctx) error {
 
 	token, err := jwt.GenerateAuthToken(ctlr.cfg.JWT.SecretKey, customerCreated.ID, customerCreated.Name, constants.RoleCustomer)
 	if err != nil {
-		ctlr.logger.Errorf("auth token error: %s", err.Error())
+		log.Errorf("auth token error: %s", err.Error())
 		utils.CreateResponse(&ctx, http.StatusInternalServerError, err)
 		return nil
 	}
@@ -121,7 +123,7 @@ func (ctlr *CustomerController) Update(ctx fiber.Ctx) error {
 	defer cancel()
 
 	customer := utils.ReadBody[models.Customer](&ctx)
-	ctlr.logger.Debugf("customer received: %v", customer)
+	log.Debugf("customer received: %v", customer)
 
 	err := jwt.ValidateUserRequestIssuer(ctx, ctlr.cfg.JWT.SecretKey, utils.CreateUserValidation(customer.ID))
 	if err != nil {
@@ -145,7 +147,7 @@ func (ctlr *CustomerController) SoftDelete(ctx fiber.Ctx) error {
 	defer cancel()
 
 	customer := utils.ReadBody[models.Customer](&ctx)
-	ctlr.logger.Debugf("customer received: %v", customer)
+	log.Debugf("customer received: %v", customer)
 
 	err := jwt.ValidateUserRequestIssuer(ctx, ctlr.cfg.JWT.SecretKey, utils.CreateUserValidation(customer.ID))
 	if err != nil {

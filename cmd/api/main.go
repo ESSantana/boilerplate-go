@@ -9,7 +9,7 @@ import (
 	"github.com/ESSantana/boilerplate-backend/internal/config"
 	"github.com/ESSantana/boilerplate-backend/internal/repositories"
 	repo_interfaces "github.com/ESSantana/boilerplate-backend/internal/repositories/interfaces"
-	"github.com/ESSantana/boilerplate-backend/internal/router"
+	routes "github.com/ESSantana/boilerplate-backend/internal/router"
 	"github.com/ESSantana/boilerplate-backend/internal/services"
 	svc_interfaces "github.com/ESSantana/boilerplate-backend/internal/services/interfaces"
 	"github.com/ESSantana/boilerplate-backend/packages/cache"
@@ -21,7 +21,6 @@ import (
 
 var (
 	cfg            *config.Config
-	logger         log.Logger
 	repoManager    repo_interfaces.RepositoryManager
 	serviceManager svc_interfaces.ServiceManager
 	cacheManager   cache_interfaces.CacheManager
@@ -29,12 +28,12 @@ var (
 
 func main() {
 	var err error
-	cfg, err = config.Load()
+	cfg, err = config.Load("../../")
 	if err != nil {
 		shutdownApp(err, "Failed to load configuration")
 	}
 
-	logger = log.NewLogger(log.LogLevel(cfg.Server.LogLevel))
+	log.SetGlobalLevel(log.LogLevel[cfg.Server.LogLevel])
 
 	initCache()
 	initRepository(context.Background())
@@ -46,7 +45,7 @@ func main() {
 func startServer() {
 	app := fiber.New()
 
-	router := routes.NewRouter(app, cfg, logger, serviceManager, cacheManager)
+	router := routes.NewRouter(app, cfg, serviceManager, cacheManager)
 	router.SetupRoutes()
 
 	err := app.Listen(":" + cfg.Server.Port)
@@ -58,7 +57,7 @@ func startServer() {
 func initCache() {
 	c := sync.Once{}
 	c.Do(func() {
-		logger.Info("Connecting to Redis...")
+		log.Info("Connecting to Redis...")
 		cacheManager = cache.NewCacheManager(cfg)
 	})
 }
@@ -66,7 +65,7 @@ func initCache() {
 func initRepository(ctx context.Context) {
 	r := sync.Once{}
 	r.Do(func() {
-		logger.Info("Connecting to MySQL...")
+		log.Info("Connecting to MySQL...")
 		repoManager = repositories.NewRepositoryManager(ctx, cfg)
 	})
 }
@@ -74,8 +73,8 @@ func initRepository(ctx context.Context) {
 func initService() {
 	s := sync.Once{}
 	s.Do(func() {
-		logger.Info("Setup service manager...")
-		serviceManager = services.NewServiceManager(logger, repoManager, cacheManager)
+		log.Info("Setup service manager...")
+		serviceManager = services.NewServiceManager(repoManager, cacheManager)
 	})
 }
 

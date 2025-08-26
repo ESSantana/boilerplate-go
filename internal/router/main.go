@@ -10,7 +10,6 @@ import (
 	"github.com/ESSantana/boilerplate-backend/internal/router/middlewares"
 	svc_interfaces "github.com/ESSantana/boilerplate-backend/internal/services/interfaces"
 	cache_interfaces "github.com/ESSantana/boilerplate-backend/packages/cache/interfaces"
-	"github.com/ESSantana/boilerplate-backend/packages/log"
 	"github.com/gofiber/fiber/v3"
 	mw_cors "github.com/gofiber/fiber/v3/middleware/cors"
 	mw_logger "github.com/gofiber/fiber/v3/middleware/logger"
@@ -19,7 +18,6 @@ import (
 type Router struct {
 	router         *fiber.App
 	cfg            *config.Config
-	logger         log.Logger
 	serviceManager svc_interfaces.ServiceManager
 	cacheManager   cache_interfaces.CacheManager
 }
@@ -27,14 +25,12 @@ type Router struct {
 func NewRouter(
 	router *fiber.App,
 	cfg *config.Config,
-	logger log.Logger,
 	serviceManager svc_interfaces.ServiceManager,
 	cacheManager cache_interfaces.CacheManager,
 ) *Router {
 	return &Router{
 		router:         router,
 		cfg:            cfg,
-		logger:         logger,
 		serviceManager: serviceManager,
 		cacheManager:   cacheManager,
 	}
@@ -72,7 +68,7 @@ func (r *Router) SetupRoutes() {
 }
 
 func (r *Router) configAuth() {
-	controller := controllers.NewAuthController(r.cfg, r.logger, r.serviceManager, r.cacheManager)
+	controller := controllers.NewAuthController(r.cfg, r.serviceManager, r.cacheManager)
 
 	// Anonymous routes
 	auth := r.router.Group("/auth")
@@ -83,7 +79,7 @@ func (r *Router) configAuth() {
 }
 
 func (r *Router) configCustomer() {
-	controller := controllers.NewCustomerController(r.cfg, r.logger, r.serviceManager, r.cacheManager)
+	controller := controllers.NewCustomerController(r.cfg, r.serviceManager, r.cacheManager)
 
 	customer := r.router.Group("/customer")
 
@@ -100,7 +96,7 @@ func (r *Router) configCustomer() {
 }
 
 func (r *Router) configPayment() {
-	controller := controllers.NewPaymentController(r.cfg, r.logger, r.serviceManager)
+	controller := controllers.NewPaymentController(r.cfg, r.serviceManager)
 
 	// Authenticated routes
 	payment := r.router.Group("/payment", middlewares.AuthMiddleware(r.cfg, []string{constants.RoleCustomer, constants.RoleAdmin, constants.RoleManager}))

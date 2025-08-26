@@ -3,16 +3,20 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/spf13/viper"
 )
 
-func Load() (*Config, error) {
-	viper.AddConfigPath("/app/config")
+func Load(configPath string) (*Config, error) {
+	if configPath == "" {
+		configPath = "/app/config"
+	}
+	viper.AddConfigPath(configPath)
 	viper.SetConfigName(".env")
 	viper.SetConfigType("env")
 
-  viper.AutomaticEnv()
+	viper.AutomaticEnv()
 
 	err := viper.ReadInConfig()
 	if err != nil {
@@ -24,6 +28,8 @@ func Load() (*Config, error) {
 	if err := viper.Unmarshal(&config.Server); err != nil {
 		return nil, err
 	}
+	config.Server.LogLevel = strings.ToUpper(config.Server.LogLevel)
+
 	if err := viper.Unmarshal(&config.Database); err != nil {
 		return nil, err
 	}

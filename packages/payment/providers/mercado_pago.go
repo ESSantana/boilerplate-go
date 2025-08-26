@@ -16,11 +16,10 @@ const (
 )
 
 type mercadoPagoPaymentProvider struct {
-	logger         log.Logger
 	mercadoPagoCfg *config.Config
 }
 
-func NewMercadoPagoProvider(logger log.Logger, authToken string) (interfaces.PaymentProvider, error) {
+func NewMercadoPagoProvider(authToken string) (interfaces.PaymentProvider, error) {
 	cfg, err := config.New(authToken)
 	if err != nil {
 		return nil, err
@@ -28,7 +27,6 @@ func NewMercadoPagoProvider(logger log.Logger, authToken string) (interfaces.Pay
 
 	return &mercadoPagoPaymentProvider{
 		mercadoPagoCfg: cfg,
-		logger:         logger,
 	}, nil
 }
 
@@ -70,7 +68,7 @@ func (provider *mercadoPagoPaymentProvider) ExecutePayment(ctx context.Context, 
 
 	data, _ := json.Marshal(preferenceRequest)
 
-	provider.logger.Debugf("Creating preference with request: %s", string(data))
+	log.Debugf("Creating preference with request: %s", string(data))
 
 	preferenceClient := preference.NewClient(provider.mercadoPagoCfg)
 	response, err := preferenceClient.Create(ctx, preferenceRequest)
