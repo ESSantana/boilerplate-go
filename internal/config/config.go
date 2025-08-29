@@ -36,7 +36,10 @@ type JWTConfig struct {
 }
 
 type AWSConfig struct {
-	DefaultRegion string `mapstructure:"AWS_DEFAULT_REGION"`
+	DefaultRegion  string `mapstructure:"AWS_DEFAULT_REGION"`
+	SESSenderEmail string `mapstructure:"SES_SENDER_EMAIL"`
+	SESReplyTo     string `mapstructure:"SES_REPLY_TO"`
+	SESConfigSet   string `mapstructure:"SES_CONFIG_SET"`
 }
 
 type FrontendConfig struct {

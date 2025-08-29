@@ -3,10 +3,12 @@ package email
 import (
 	"context"
 	"fmt"
+	"net/url"
 
 	app_cfg "github.com/ESSantana/boilerplate-backend/internal/config"
 	"github.com/ESSantana/boilerplate-backend/internal/domain/models"
 	"github.com/ESSantana/boilerplate-backend/packages/email/domain"
+	"github.com/ESSantana/boilerplate-backend/packages/email/templates"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sesv2"
@@ -38,8 +40,22 @@ func (em *EmailManager) SendRecoverPasswordEmail(ctx context.Context, customer m
 		return nil
 	}
 
+	base, _ := url.Parse(em.cfg.Frontend.AuthRedirect)
+	base.Path = "/recover-password"
+	q := base.Query()
+	q.Set("email", customer.Email)
+	base.RawQuery = q.Encode()
+
+	subject := "Redefinição de senha"
+	htmlBody := templates.RecoverPasswordHTML("Boilerplate App", customer.Name, base.String())
+
 	sendRequest := domain.SendEmailRequest{
+		SenderEmail: em.cfg.AWS.SESSenderEmail,
+		ReplyTo:     em.cfg.AWS.SESReplyTo,
 		Destination: customer.Email,
+		ConfigSet:   em.cfg.AWS.SESConfigSet,
+		Subject:     subject,
+		Body:        htmlBody,
 	}
 
 	messageID, err := em.sendEmail(ctx, sendRequest)
