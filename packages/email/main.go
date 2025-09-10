@@ -77,10 +77,10 @@ func (em *EmailManager) sendEmail(ctx context.Context, request domain.SendEmailR
 			ToAddresses: []string{request.Destination},
 		},
 		ConfigurationSetName: aws.String(request.ConfigSet),
-		ListManagementOptions: &types.ListManagementOptions{
-			ContactListName: aws.String("main"),
-			TopicName:       aws.String("main"),
-		},
+		// ListManagementOptions: &types.ListManagementOptions{
+		// 	 ContactListName: aws.String("main"),
+		// 	 TopicName:       aws.String("main"),
+		// },
 		EmailTags: request.EmailTags,
 		Content: &types.EmailContent{
 			Simple: &types.Message{
